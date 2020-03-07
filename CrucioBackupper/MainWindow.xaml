@@ -1,0 +1,95 @@
+﻿<Window x:Class="CrucioBackupper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CrucioBackuper"
+        mc:Ignorable="d"
+        Title="快点阅读文章备份器" Height="500" Width="800">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">搜索内容：</Label>
+            <Button DockPanel.Dock="Right" x:Name="SearchButton" Click="SearchButton_Click" IsDefault="{Binding IsFocused, ElementName=SearchContentTextBox}">搜索</Button>
+            <TextBox x:Name="SearchContentTextBox" VerticalContentAlignment="Center">
+                <TextBox.Resources>
+                    <VisualBrush x:Key="HintText" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
+                        <VisualBrush.Visual>
+                            <TextBlock Text="作品名称/KN号" />
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </TextBox.Resources>
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value="{x:Null}">
+                                <Setter Property="Background" Value="{StaticResource HintText}"/>
+                            </Trigger>
+                            <Trigger Property="Text" Value="">
+                                <Setter Property="Background" Value="{StaticResource HintText}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+        </DockPanel>
+        <Label DockPanel.Dock="Bottom">
+            <TextBlock>请注意：<LineBreak />本工具仅用于学习交流使用，作者不对使用本软件可能引起的任何后果（如侵权）承担任何责任<LineBreak />本工具仅用于想要退出快点的作家备份自己的文章<LineBreak />请您确保您对保存的文章拥有版权<LineBreak />友情提醒：签约作者的作品，其版权可能在平台手中，具体请参考您的合约</TextBlock>
+        </Label>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">其他操作：</Label>
+            <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Margin="5,0,0,0" x:Name="FixImageProblem" Click="FixImageProblem_Click">修复图片显示失败</Button>
+                <Button Margin="5,0,0,0" x:Name="ReadBackupButton" Click="ReadBackupButton_Click">查看备份</Button>
+            </StackPanel>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">文章Uuid：</Label>
+            <Button DockPanel.Dock="Right" x:Name="DownloadButton" Click="DownloadButton_Click" IsDefault="{Binding IsFocused, ElementName=CollectionUuidTextBox}">下载</Button>
+            <TextBox VerticalContentAlignment="Center" x:Name="CollectionUuidTextBox" Text="{Binding SelectedValue, ElementName=SearchResultListView, Mode=OneWay}">
+                <TextBox.Resources>
+                    <VisualBrush x:Key="HintText" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
+                        <VisualBrush.Visual>
+                            <TextBlock Text="文章内部唯一编号，非KN号" />
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </TextBox.Resources>
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value="{x:Null}">
+                                <Setter Property="Background" Value="{StaticResource HintText}"/>
+                            </Trigger>
+                            <Trigger Property="Text" Value="">
+                                <Setter Property="Background" Value="{StaticResource HintText}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+        </DockPanel>
+        <ListView x:Name="SearchResultListView" SelectedValuePath="Uuid">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{Binding CoverUrl}" Width="100" Height="132" VerticalAlignment="Top"/>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                    <TextBlock Text="{Binding ShareUuid, StringFormat=KN号：\{0\}}" />
+                                </Border>
+                                <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                    <TextBlock Text="{Binding ClickCountDesc, StringFormat=点击数：\{0\}}" />
+                                </Border>
+                                <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                    <TextBlock Text="{Binding LikeCountDesc, StringFormat=点赞量：\{0\}}" />
+                                </Border>
+                            </StackPanel>
+                            <Label Content="{Binding Desc}" />
+                        </StackPanel>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </DockPanel>
+</Window>
