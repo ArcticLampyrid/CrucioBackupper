@@ -33,7 +33,7 @@
             </TextBox>
         </DockPanel>
         <Label DockPanel.Dock="Bottom">
-            <TextBlock>请注意：<LineBreak />本工具仅用于学习交流使用，作者不对使用本软件可能引起的任何后果（如侵权）承担任何责任<LineBreak />本工具仅用于想要退出快点的作家备份自己的文章<LineBreak />请您确保您对保存的文章拥有版权<LineBreak />友情提醒：签约作者的作品，其版权可能在平台手中，具体请参考您的合约</TextBlock>
+            <TextBlock>请注意：<LineBreak />本工具仅用于学习交流使用，作者不对使用本软件可能引起的任何后果（如侵权）承担任何责任<LineBreak />本工具仅用于想要退出快点的作家备份自己的文章<LineBreak />请您确保您对保存的文章拥有版权<LineBreak />友情提醒：签约作者的作品，其版权可能在平台手中，具体请参考您的合约<LineBreak />本工具完全开源，主页地址：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper" Click="Hyperlink_Click">https://github.com/1354092549/CrucioBackupper</Hyperlink></TextBlock>
         </Label>
         <DockPanel DockPanel.Dock="Bottom">
             <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">其他操作：</Label>

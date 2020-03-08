@@ -128,5 +128,15 @@ namespace CrucioBackupper
                 MessageBox.Show($"启动安装程序失败：{exception}");
             }
         }
+
+        private void Hyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            Hyperlink link = sender as Hyperlink;
+            Process.Start(new ProcessStartInfo()
+            {
+                UseShellExecute = true, 
+                FileName = link.NavigateUri.AbsoluteUri
+            });
+        }
     }
 }
