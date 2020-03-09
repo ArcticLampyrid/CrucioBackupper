@@ -230,7 +230,7 @@ namespace CrucioBackupper
         private void SaveVideoMessageMenu_Click(object sender, RoutedEventArgs e)
         {
             var dataContext = (sender as FrameworkElement).DataContext as VideoMessageContentViewModel;
-            var path = GetContentFilePath($"Video/{dataContext.Uuid}.m4a");
+            var path = GetContentFilePath($"Video/{dataContext.Uuid}.mp4");
             var dialog = new SaveFileDialog()
             {
                 Filter = "MPEG-4 Video文件(*.mp4)|*.mp4",
