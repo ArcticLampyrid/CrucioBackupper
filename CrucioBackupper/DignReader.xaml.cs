@@ -13,6 +13,7 @@ using System.IO;
 using CrucioBackupper.Model;
 using Newtonsoft.Json;
 using CrucioBackupper.ViewModel;
+using Microsoft.Win32;
 
 namespace CrucioBackupper
 {
@@ -180,6 +181,65 @@ namespace CrucioBackupper
                 ZoomSlider.Value -= ZoomSlider.LargeChange;
             }
             e.Handled = true;
+        }
+
+        private void SaveImageMessageMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var path = (sender as FrameworkElement).DataContext as string;
+            var dialog = new SaveFileDialog()
+            {
+                Filter = "WebP图像文件(*.webp)|*.webp",
+                FileName = Path.GetFileName(path)
+            };
+            if (dialog.ShowDialog().GetValueOrDefault(false))
+            {
+                File.Copy(path, dialog.FileName);
+            }
+        }
+
+        private void SaveAvatarMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var dataContext = (sender as FrameworkElement).DataContext as ChatMessageViewModel;
+            var path = dataContext.AvatarPath;
+            var dialog = new SaveFileDialog()
+            {
+                Filter = "WebP图像文件(*.webp)|*.webp",
+                FileName = Path.GetFileName(path)
+            };
+            if (dialog.ShowDialog().GetValueOrDefault(false))
+            {
+                File.Copy(path, dialog.FileName);
+            }
+        }
+
+        private void SaveAudioMessageMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var dataContext = (sender as FrameworkElement).DataContext as AudioMessageContentViewModel;
+            var path = GetContentFilePath($"Audio/{dataContext.Uuid}.m4a");
+            var dialog = new SaveFileDialog()
+            {
+                Filter = "MPEG-4 Audio文件(*.m4a)|*.m4a",
+                FileName = Path.GetFileName(path)
+            };
+            if (dialog.ShowDialog().GetValueOrDefault(false))
+            {
+                File.Copy(path, dialog.FileName);
+            }
+        }
+
+        private void SaveVideoMessageMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var dataContext = (sender as FrameworkElement).DataContext as VideoMessageContentViewModel;
+            var path = GetContentFilePath($"Video/{dataContext.Uuid}.m4a");
+            var dialog = new SaveFileDialog()
+            {
+                Filter = "MPEG-4 Video文件(*.mp4)|*.mp4",
+                FileName = Path.GetFileName(path)
+            };
+            if (dialog.ShowDialog().GetValueOrDefault(false))
+            {
+                File.Copy(path, dialog.FileName);
+            }
         }
     }
 }

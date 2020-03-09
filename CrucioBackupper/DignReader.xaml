@@ -18,6 +18,11 @@
                         <Image.Clip>
                             <EllipseGeometry RadiusX="20" RadiusY="20" Center="20,20"/>
                         </Image.Clip>
+                        <Image.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="导出" Click="SaveAvatarMenu_Click"/>
+                            </ContextMenu>
+                        </Image.ContextMenu>
                     </Image>
                     <Label Content="{Binding CharacterName}" DockPanel.Dock="Top" HorizontalAlignment="Left" Foreground="DarkGray"/>
                     <Border Background="WhiteSmoke" CornerRadius="5" HorizontalAlignment="Left">
@@ -38,6 +43,11 @@
                         <Image.Clip>
                             <EllipseGeometry RadiusX="20" RadiusY="20" Center="20,20"/>
                         </Image.Clip>
+                        <Image.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="导出" Click="SaveAvatarMenu_Click"/>
+                            </ContextMenu>
+                        </Image.ContextMenu>
                     </Image>
                     <Label Content="{Binding CharacterName}" DockPanel.Dock="Top" HorizontalAlignment="Right" Foreground="DarkGray"/>
                     <Border Background="LightGreen" CornerRadius="5" HorizontalAlignment="Right">
@@ -65,10 +75,22 @@
                 </Border>
             </DataTemplate>
             <DataTemplate x:Key="TextMessageContentTemplate">
-                <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay}" TextWrapping="Wrap" Background="Transparent" BorderThickness="0" Padding="5"/>
+                <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay}" TextWrapping="Wrap" Background="Transparent" BorderThickness="0" Padding="5">
+                    <TextBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="复制" Command="Copy" />
+                        </ContextMenu>
+                    </TextBox.ContextMenu>
+                </TextBox>
             </DataTemplate>
             <DataTemplate x:Key="ImageMessageContentTemplate">
-                <Image Source="{Binding}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality" />
+                <Image Source="{Binding}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality">
+                    <Image.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="导出" Click="SaveImageMessageMenu_Click"/>
+                        </ContextMenu>
+                    </Image.ContextMenu>
+                </Image>
             </DataTemplate>
             <DataTemplate x:Key="AudioMessageContentTemplate">
                 <Button BorderThickness="0" Padding="5" Click="PlayAudioButton_Click">
@@ -76,6 +98,11 @@
                         <Image Source="{StaticResource Icon_Audio}" Width="20" Margin="0,0,5,0"/>
                         <TextBlock Text="{Binding DurationDesc}" VerticalAlignment="Center" />
                     </StackPanel>
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="导出" Click="SaveAudioMessageMenu_Click"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
                 </Button>
             </DataTemplate>
             <DataTemplate x:Key="VideoMessageContentTemplate">
@@ -87,6 +114,11 @@
                         </StackPanel>
                         <Image Source="{Binding CoverPath}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </DockPanel>
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="导出" Click="SaveVideoMessageMenu_Click"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
                 </Button>
             </DataTemplate>
         </ResourceDictionary>
