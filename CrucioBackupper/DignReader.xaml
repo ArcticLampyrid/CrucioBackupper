@@ -107,13 +107,15 @@
             </DataTemplate>
             <DataTemplate x:Key="VideoMessageContentTemplate">
                 <Button BorderThickness="0" Padding="5" Click="PlayVideoButton_Click">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                            <Label Content="视频" HorizontalAlignment="Left"/>
-                            <Label Content="{Binding DurationDesc}" HorizontalAlignment="Right"/>
-                        </StackPanel>
+                    <Grid>
                         <Image Source="{Binding CoverPath}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    </DockPanel>
+                        <Border Background="#7F0A0A0A" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+                            <Grid>
+                                <Label Content="视频" Panel.ZIndex="1" HorizontalAlignment="Left" Foreground="White"/>
+                                <Label Content="{Binding DurationDesc}" Panel.ZIndex="1" HorizontalAlignment="Right" Foreground="White"/>
+                            </Grid>
+                        </Border> 
+                    </Grid>
                     <Button.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="导出" Click="SaveVideoMessageMenu_Click"/>
