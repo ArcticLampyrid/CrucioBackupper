@@ -128,7 +128,7 @@ namespace CrucioBackupper
                         {
                             Duration = dialog.Video.Duration,
                             Uuid = dialog.Video.Uuid,
-                            CoverPath = GetContentFilePath(dialog.Video.CoverImageUuid)
+                            CoverPath = GetContentFilePath($"Image/{dialog.Video.CoverImageUuid}.webp")
                         };
                         break;
                     default:
