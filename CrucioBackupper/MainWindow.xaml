@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CrucioBackuper"
+        xmlns:local="clr-namespace:CrucioBackupper"
+        xmlns:vm="clr-namespace:CrucioBackupper.ViewModel"
         mc:Ignorable="d"
         Title="快点阅读文章备份器" Height="500" Width="800">
     <DockPanel>
@@ -32,8 +33,14 @@
                 </TextBox.Style>
             </TextBox>
         </DockPanel>
-        <Label DockPanel.Dock="Bottom">
-            <TextBlock>请注意：<LineBreak />本工具仅用于学习交流使用，作者不对使用本软件可能引起的任何后果（如侵权）承担任何责任<LineBreak />本工具仅用于想要退出快点的作家备份自己的文章<LineBreak />请您确保您对保存的文章拥有版权<LineBreak />友情提醒：签约作者的作品，其版权可能在平台手中，具体请参考您的合约<LineBreak />本工具完全开源，主页地址：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper" Click="Hyperlink_Click">https://github.com/1354092549/CrucioBackupper</Hyperlink></TextBlock>
+        <Label DockPanel.Dock="Bottom" DataContext="{x:Static vm:AboutViewModel.Instance}">
+            <TextBlock TextWrapping="Wrap">请注意：<LineBreak />
+                本工具仅用于学习交流使用，作者不对使用本软件可能引起的任何后果（如侵权）承担任何责任<LineBreak />
+                本工具仅用于想要退出快点的作家备份自己的文章<LineBreak />
+                请您确保您对保存的文章拥有版权<LineBreak />
+                友情提醒：签约作者的作品，其版权可能在平台手中，具体请参考您的合约<LineBreak />
+                当前版本：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper/releases" Click="Hyperlink_Click"><Run Text="{Binding VersionDesc, Mode=OneWay}" /></Hyperlink><LineBreak />
+                本工具完全开源，主页地址：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper" Click="Hyperlink_Click">https://github.com/1354092549/CrucioBackupper</Hyperlink></TextBlock>
         </Label>
         <DockPanel DockPanel.Dock="Bottom">
             <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">其他操作：</Label>
