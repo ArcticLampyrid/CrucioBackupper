@@ -79,7 +79,10 @@ namespace CrucioBackupper
         public async Task Download()
         {
             var collectionDetail = await CrucioApi.GetCollectionDetail(collectionUuid);
-            var stories = collectionDetail.Data.Stories.OrderBy(x => x.Index).ToList();
+            var stories = collectionDetail.Data.Stories
+                .Where(x => x.CollectionUuid == collectionUuid)
+                .OrderBy(x => x.Index)
+                .ToList();
             string coverUuid = null;
             var storiesDetail = stories.Select(x => CrucioApi.GetStoryDetail(x.Uuid)).ToList();
             var dealogInfos = stories.Select(x => CrucioApi.GetAllDialogInfo(x)).ToList();
