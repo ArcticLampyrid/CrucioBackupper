@@ -9,6 +9,7 @@ using System.Net;
 using Newtonsoft.Json;
 using CrucioBackupper.Crucio.Model;
 using System.Security.Cryptography;
+using System.Web;
 
 namespace CrucioBackupper.Crucio
 {
@@ -104,13 +105,45 @@ namespace CrucioBackupper.Crucio
         {
             var random = new Random();
             var uid = GenerateUid(random);
-            client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/3.00.11.1 (Android/28;Build/HUAWEI GLK-AL00;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
+            client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/4.01.03.1 (Android/28;Build/HUAWEI GLK-AL00;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
         }
 
-        public static async Task<Stream> GetData(string path)
+        private static string ToLowerCaseHexString(this byte[] bytes)
+        {
+            var sb = new StringBuilder();
+            foreach (var t in bytes)
+            {
+                sb.Append(t.ToString("x2"));
+            }
+            return sb.ToString();
+        }
+
+        public static async Task<Stream> ApiGet(string path)
         {
             var url = $"https://{ApiDomain}{path}";
-            var responseMessage = await client.GetAsync(url);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            return await HttpRequest(request);
+        }
+
+        public static async Task<Stream> HttpRequest(HttpRequestMessage request)
+        {
+            var timestamp = (long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds;
+            var queryList = HttpUtility.ParseQueryString(request.RequestUri.Query);
+            var queryInfo = string.Join("&", queryList.AllKeys.Select(x => $"{Uri.EscapeDataString(x)}={Uri.EscapeDataString(queryList[x]).Replace("%3D", "%253D")}"));
+            var requestBodySHA256 = SHA256.Create().ComputeHash(request.Content != null
+                ? await request.Content.ReadAsStreamAsync()
+                : Stream.Null).ToLowerCaseHexString();
+            var requestInfo = $"{request.Method.Method}\n{request.RequestUri.AbsolutePath}\n{queryInfo}\nx-crucio-timestamp:{timestamp}\n{requestBodySHA256}";
+            var requestInfoSHA256 = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(requestInfo)).ToLowerCaseHexString();
+            var signInfo = $"KD1\n{timestamp}\nb975487c3cc1867a9a0bd87a63aae258ac776a06\n{requestInfoSHA256}";
+            var hmacKey = request.RequestUri.Host == ApiDomain
+                ? Encoding.UTF8.GetBytes("ae2ce93f486b638849f6f438c3b38d3a") 
+                : Encoding.UTF8.GetBytes("0e666341456764fcb3184767adcf2884");
+            var sign = new HMACSHA256(hmacKey).ComputeHash(Encoding.UTF8.GetBytes(signInfo)).ToLowerCaseHexString();
+            request.Headers.Add("X-Crucio-Timestamp", timestamp.ToString());
+            request.Headers.Add("Authorization", $"KD1 Credential=10001, Signature={sign}");
+
+            var responseMessage = await client.SendAsync(request);
             var result = await responseMessage.Content.ReadAsStreamAsync();
             if (responseMessage.Headers.Contains("X-Crucio-Codec") && responseMessage.Headers.GetValues("X-Crucio-Codec").First() == "1")
             {
@@ -124,22 +157,22 @@ namespace CrucioBackupper.Crucio
             using var content = new FormUrlEncodedContent(new Dictionary<string, string> {
                 { "q", target }
             });
-            return DeserializeObject<ApiResult<SearchResult>>(await GetData("/v7/search?" + await content.ReadAsStringAsync()));
+            return DeserializeObject<ApiResult<SearchResult>>(await ApiGet("/v7/search?" + await content.ReadAsStringAsync()));
         }
 
         public static async Task<ApiResult<CollectionDetail>> GetCollectionDetail(string uuid)
         {
-            return DeserializeObject<ApiResult<CollectionDetail>>(await GetData($"/v6/collection/{uuid}"));
+            return DeserializeObject<ApiResult<CollectionDetail>>(await ApiGet($"/v6/collection/{uuid}"));
         }
 
         public static async Task<ApiResult<StoryDetail>> GetStoryDetail(string uuid)
         {
-            return DeserializeObject<ApiResult<StoryDetail>>(await GetData($"/v9/story/{uuid}/basis"));
+            return DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v9/story/{uuid}/basis"));
         }
 
         public static async Task<ApiResult<DialogInfo>> GetDialogInfo(string uuid, int start, int end)
         {
-            return DeserializeObject<ApiResult<DialogInfo>>(await GetData($"/v9/story/{uuid}/dialogs?start={start}&end={end}"));
+            return DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v9/story/{uuid}/dialogs?start={start}&end={end}"));
         }
 
         public static async Task<ApiResult<DialogInfo>> GetAllDialogInfo(StoryBrief storyBrief)

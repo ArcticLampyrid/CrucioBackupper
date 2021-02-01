@@ -4,6 +4,7 @@ using CrucioBackupper.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -17,11 +18,6 @@ namespace CrucioBackupper
 {
     class CrucioDownloader
     {
-        private static readonly HttpClient client = new HttpClient(new HttpClientHandler()
-        {
-            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-        });
-
         private static readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings()
         {
             Formatting = Formatting.Indented
@@ -55,7 +51,7 @@ namespace CrucioBackupper
         public async Task DownloadResource(string type, string uuid, string ext, string url)
         {
             using var targetStream = target.CreateEntry($"{type}/{uuid}.{ext}", CompressionLevel.NoCompression).Open();
-            using var networkStream = await client.GetStreamAsync(url);
+            using var networkStream = await CrucioApi.HttpRequest(new HttpRequestMessage(HttpMethod.Get, url));
             await networkStream.CopyToAsync(targetStream);
         }
 
@@ -169,8 +165,9 @@ namespace CrucioBackupper
                     };
                     WriteStory(storyModel);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Trace.TraceError($"Failed to download story #{storyBrief.Index}({storyBrief.Uuid}): {e}");
                     throw;
                 }
             }
