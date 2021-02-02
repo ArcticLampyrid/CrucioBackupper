@@ -176,7 +176,7 @@ namespace CrucioBackupper
             {
                 Name = collectionDetail.Data.Collections[0].Name,
                 Desc = collectionDetail.Data.Collections[0].Desc,
-                StoryCount = collectionDetail.Data.Collections[0].StoryCount,
+                StoryCount = Math.Max(collectionDetail.Data.Collections[0].StoryCount, stories.Count),
                 CoverUuid = coverUuid,
                 Stories = stories.Select(x => new BasicStoryModel()
                 {
