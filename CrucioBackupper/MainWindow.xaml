@@ -42,38 +42,44 @@
                 当前版本：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper/releases" Click="Hyperlink_Click"><Run Text="{Binding VersionDesc, Mode=OneWay}" /></Hyperlink><LineBreak />
                 本工具完全开源，主页地址：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper" Click="Hyperlink_Click">https://github.com/1354092549/CrucioBackupper</Hyperlink></TextBlock>
         </Label>
-        <DockPanel DockPanel.Dock="Bottom">
-            <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">其他操作：</Label>
-            <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button Margin="5,0,0,0" x:Name="FixImageProblem" Click="FixImageProblem_Click">修复图片显示失败</Button>
-                <Button Margin="5,0,0,0" x:Name="ReadBackupButton" Click="ReadBackupButton_Click">查看备份</Button>
-            </StackPanel>
-        </DockPanel>
-        <DockPanel DockPanel.Dock="Bottom">
-            <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">文章Uuid：</Label>
-            <Button DockPanel.Dock="Right" x:Name="DownloadButton" Click="DownloadButton_Click" IsDefault="{Binding IsFocused, ElementName=CollectionUuidTextBox}">下载</Button>
-            <TextBox VerticalContentAlignment="Center" x:Name="CollectionUuidTextBox" Text="{Binding SelectedValue, ElementName=SearchResultListView, Mode=OneWay}">
-                <TextBox.Resources>
-                    <VisualBrush x:Key="HintText" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
-                        <VisualBrush.Visual>
-                            <TextBlock Text="文章内部唯一编号，非KN号" />
-                        </VisualBrush.Visual>
-                    </VisualBrush>
-                </TextBox.Resources>
-                <TextBox.Style>
-                    <Style TargetType="TextBox">
-                        <Style.Triggers>
-                            <Trigger Property="Text" Value="{x:Null}">
-                                <Setter Property="Background" Value="{StaticResource HintText}"/>
-                            </Trigger>
-                            <Trigger Property="Text" Value="">
-                                <Setter Property="Background" Value="{StaticResource HintText}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBox.Style>
-            </TextBox>
-        </DockPanel>
+        <StackPanel DockPanel.Dock="Bottom">
+            <DockPanel>
+                <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">Token（VIP文章请提供）：</Label>
+                <TextBox VerticalContentAlignment="Center" x:Name="TokenTextBox"/>
+            </DockPanel>
+            <DockPanel>
+                <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">文章Uuid：</Label>
+                <Button DockPanel.Dock="Right" x:Name="DownloadButton" Click="DownloadButton_Click" IsDefault="{Binding IsFocused, ElementName=CollectionUuidTextBox}">下载</Button>
+                <TextBox VerticalContentAlignment="Center" x:Name="CollectionUuidTextBox" Text="{Binding SelectedValue, ElementName=SearchResultListView, Mode=OneWay}">
+                    <TextBox.Resources>
+                        <VisualBrush x:Key="HintText" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
+                            <VisualBrush.Visual>
+                                <TextBlock Text="文章内部唯一编号，非KN号" />
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </TextBox.Resources>
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="{x:Null}">
+                                    <Setter Property="Background" Value="{StaticResource HintText}"/>
+                                </Trigger>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Background" Value="{StaticResource HintText}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+            </DockPanel>
+            <DockPanel>
+                <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">其他操作：</Label>
+                <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button Margin="5,0,0,0" x:Name="FixImageProblem" Click="FixImageProblem_Click">修复图片显示失败</Button>
+                    <Button Margin="5,0,0,0" x:Name="ReadBackupButton" Click="ReadBackupButton_Click">查看备份</Button>
+                </StackPanel>
+            </DockPanel>
+        </StackPanel>
         <ListView x:Name="SearchResultListView" SelectedValuePath="Uuid">
             <ListView.ItemTemplate>
                 <DataTemplate>

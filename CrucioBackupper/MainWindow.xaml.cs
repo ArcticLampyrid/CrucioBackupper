@@ -87,6 +87,7 @@ namespace CrucioBackupper
                 {
                     File.Delete(path);
                 }
+                CrucioApi.SetToken(TokenTextBox.Text);
                 using var target = ZipFile.Open(path, ZipArchiveMode.Create);
                 await new CrucioDownloader(collectionUuid, target).Download();
             }

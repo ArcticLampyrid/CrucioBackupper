@@ -18,10 +18,18 @@ namespace CrucioBackupper.Crucio
         private const string ApiDomain = "api.crucio.hecdn.com";
         private const string ImageDomain = "qc.i.hecdn.com";
 
+        private static CookieContainer cookieContainer = new CookieContainer();
         private static readonly HttpClient client = new HttpClient(new HttpClientHandler()
         {
-            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            UseCookies = true,
+            CookieContainer = cookieContainer
         });
+
+        public static void SetToken(string token) 
+        {
+            cookieContainer.Add(new Cookie("token", token, "/", ApiDomain));
+        }
 
         private static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
         {
@@ -165,12 +173,12 @@ namespace CrucioBackupper.Crucio
 
         public static async Task<ApiResult<StoryDetail>> GetStoryDetail(string uuid)
         {
-            return await DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v9/story/{uuid}/basis"));
+            return await DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v10/story/{uuid}/basis"));
         }
 
         public static async Task<ApiResult<DialogInfo>> GetDialogInfo(string uuid, int start, int end)
         {
-            return await DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v9/story/{uuid}/dialogs?start={start}&end={end}"));
+            return await DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v10/story/{uuid}/dialogs?start={start}&end={end}"));
         }
 
         public static async Task<ApiResult<DialogInfo>> GetAllDialogInfo(StoryBrief storyBrief)
