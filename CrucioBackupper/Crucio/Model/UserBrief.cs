@@ -9,9 +9,9 @@ namespace CrucioBackupper.Crucio.Model
         public string AvatarWidgetSquareImageUuid { get; set; }
         public List<int> Badges { get; set; }
         public string Gender { get; set; }
-        public string IsEditor { get; set; }
-        public string IsOfficial { get; set; }
-        public string IsVip { get; set; }
+        public bool IsEditor { get; set; }
+        public bool IsOfficial { get; set; }
+        public bool IsVip { get; set; }
         public string Name { get; set; }
         public string ProfileImageUuid { get; set; }
         public string Signature { get; set; }

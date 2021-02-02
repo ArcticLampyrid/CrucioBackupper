@@ -6,10 +6,10 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Net;
-using Newtonsoft.Json;
 using CrucioBackupper.Crucio.Model;
 using System.Security.Cryptography;
 using System.Web;
+using System.Text.Json;
 
 namespace CrucioBackupper.Crucio
 {
@@ -23,22 +23,20 @@ namespace CrucioBackupper.Crucio
             AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
         });
 
-        private static readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings()
+        private static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
         {
-            ContractResolver = new UnderlineSplitContractResolver()
-        });
+            PropertyNamingPolicy = new UnderlineSplitNamingPolicy(),
+            IgnoreNullValues = true
+        };
 
-        public static T DeserializeObject<T>(Stream stream)
+        public async static Task<T> DeserializeObject<T>(Stream stream)
         {
-            using var jsonTextReader = new JsonTextReader(new StreamReader(stream, Encoding.UTF8));
-            return serializer.Deserialize<T>(jsonTextReader);
+            return await JsonSerializer.DeserializeAsync<T>(stream, serializerOptions);
         }
 
         public static string SerializeObject(object data)
         {
-            using var writer = new StringWriter();
-            serializer.Serialize(writer, data);
-            return writer.ToString();
+            return JsonSerializer.Serialize(data, serializerOptions);
         }
 
         #region Uid
@@ -157,22 +155,22 @@ namespace CrucioBackupper.Crucio
             using var content = new FormUrlEncodedContent(new Dictionary<string, string> {
                 { "q", target }
             });
-            return DeserializeObject<ApiResult<SearchResult>>(await ApiGet("/v7/search?" + await content.ReadAsStringAsync()));
+            return await DeserializeObject<ApiResult<SearchResult>>(await ApiGet("/v7/search?" + await content.ReadAsStringAsync()));
         }
 
         public static async Task<ApiResult<CollectionDetail>> GetCollectionDetail(string uuid)
         {
-            return DeserializeObject<ApiResult<CollectionDetail>>(await ApiGet($"/v6/collection/{uuid}"));
+            return await DeserializeObject<ApiResult<CollectionDetail>>(await ApiGet($"/v6/collection/{uuid}"));
         }
 
         public static async Task<ApiResult<StoryDetail>> GetStoryDetail(string uuid)
         {
-            return DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v9/story/{uuid}/basis"));
+            return await DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v9/story/{uuid}/basis"));
         }
 
         public static async Task<ApiResult<DialogInfo>> GetDialogInfo(string uuid, int start, int end)
         {
-            return DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v9/story/{uuid}/dialogs?start={start}&end={end}"));
+            return await DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v9/story/{uuid}/dialogs?start={start}&end={end}"));
         }
 
         public static async Task<ApiResult<DialogInfo>> GetAllDialogInfo(StoryBrief storyBrief)

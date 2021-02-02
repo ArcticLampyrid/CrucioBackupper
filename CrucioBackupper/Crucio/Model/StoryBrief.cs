@@ -13,8 +13,8 @@ namespace CrucioBackupper.Crucio.Model
         public string Desc { get; set; }
         public int DialogCount { get; set; }
         public int Index { get; set; }
-        public string IsLocked { get; set; }
-        public string IsVideoType { get; set; }
+        public bool IsLocked { get; set; }
+        public bool IsVideoType { get; set; }
         public string Name { get; set; }
         public int Style { get; set; }
         public string Title { get; set; }

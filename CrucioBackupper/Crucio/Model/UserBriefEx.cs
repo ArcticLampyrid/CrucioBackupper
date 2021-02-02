@@ -4,9 +4,9 @@
     {
         public int FollowerCount { get; set; }
         public int FollowingCount { get; set; }
-        public string IsFollower { get; set; }
-        public string IsFollowing { get; set; }
-        public string IsInBlacklist { get; set; }
+        public bool IsFollower { get; set; }
+        public bool IsFollowing { get; set; }
+        public bool IsInBlacklist { get; set; }
         public string Uuid { get; set; }
     }
 }

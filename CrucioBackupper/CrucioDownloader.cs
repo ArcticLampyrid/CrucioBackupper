@@ -1,7 +1,6 @@
 ﻿using CrucioBackupper.Crucio;
 using CrucioBackupper.Crucio.Model;
 using CrucioBackupper.Model;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,23 +11,25 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CrucioBackupper
 {
     class CrucioDownloader
     {
-        private static readonly JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings()
-        {
-            Formatting = Formatting.Indented
-        });
-
         private readonly string collectionUuid;
         private readonly ZipArchive target;
 
         private HashSet<string> ImageSet = new HashSet<string>();
         private Dictionary<string, string> AudioMap = new Dictionary<string, string>();
         private Dictionary<string, string> VideoMap = new Dictionary<string, string>();
+        private static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
+        {
+            IgnoreNullValues = true,
+            WriteIndented = true
+        };
 
         public CrucioDownloader(string collectionUuid, ZipArchive target)
         {
@@ -36,16 +37,16 @@ namespace CrucioBackupper
             this.target = target ?? throw new ArgumentNullException(nameof(target));
         }
 
-        private void WriteStory(StoryModel model)
+        private async Task WriteStory(StoryModel model)
         {
-            using var writer = new StreamWriter(target.CreateEntry($"Story/{model.Seq}.json").Open(), Encoding.UTF8);
-            serializer.Serialize(writer, model);
+            using var stream = target.CreateEntry($"Story/{model.Seq}.json").Open();
+            await JsonSerializer.SerializeAsync(stream, model, serializerOptions);
         }
 
-        private void WriteCollection(CollectionModel model)
+        private async Task WriteCollection(CollectionModel model)
         {
-            using var writer = new StreamWriter(target.CreateEntry("Manifest.json").Open(), Encoding.UTF8);
-            serializer.Serialize(writer, model);
+            using var stream = target.CreateEntry("Manifest.json").Open();
+            await JsonSerializer.SerializeAsync(stream, model, serializerOptions);
         }
 
         public async Task DownloadResource(string type, string uuid, string ext, string url)
@@ -163,7 +164,7 @@ namespace CrucioBackupper
                             return result;
                         }).ToList()
                     };
-                    WriteStory(storyModel);
+                    await WriteStory(storyModel);
                 }
                 catch (Exception e)
                 {
@@ -184,7 +185,7 @@ namespace CrucioBackupper
                 }).ToList()
             };
             ImageSet.Add(coverUuid);
-            WriteCollection(collectionModel);
+            await WriteCollection(collectionModel);
             await DownloadResource();
         }
     }

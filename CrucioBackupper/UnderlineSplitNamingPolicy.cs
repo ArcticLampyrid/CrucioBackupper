@@ -1,18 +1,13 @@
-﻿using Newtonsoft.Json.Serialization;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace CrucioBackupper
 {
-    public class UnderlineSplitContractResolver : DefaultContractResolver
+    public class UnderlineSplitNamingPolicy : JsonNamingPolicy
     {
-        protected override string ResolvePropertyName(string propertyName)
-        {
-            return CamelCaseToUnderlineSplit(propertyName);
-        }
-
-        private string CamelCaseToUnderlineSplit(string name)
+        public override string ConvertName(string name)
         {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < name.Length; i++)

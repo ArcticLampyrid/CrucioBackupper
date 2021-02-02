@@ -7,7 +7,7 @@ namespace CrucioBackupper.Crucio.Model
         public long ClickCount { get; set; }
         public int CommentCount { get; set; }
         public string Desc { get; set; }
-        public string IsSubscribed { get; set; }
+        public bool IsSubscribed { get; set; }
         public int LikeCount { get; set; }
         public string Name { get; set; }
         public string OriginalStatement { get; set; }

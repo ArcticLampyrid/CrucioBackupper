@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace CrucioBackupper.Crucio.Model
 {
@@ -12,9 +12,9 @@ namespace CrucioBackupper.Crucio.Model
         public List<UserBrief> Users { get; set; }
         public UuidListInfo DiscussionUuids { get; set; }
         public List<DiscussionBrief> Discussions { get; set; }
-        [JsonProperty("xusers")]
+        [JsonPropertyName("xusers")]
         public List<UserBriefEx> UsersEx { get; set; }
-        [JsonProperty("xstories")]
+        [JsonPropertyName("xstories")]
         public List<StoryBriefEx> StoriesEx { get; set; }
     }
 }

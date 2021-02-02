@@ -11,9 +11,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
 using CrucioBackupper.Model;
-using Newtonsoft.Json;
 using CrucioBackupper.ViewModel;
 using Microsoft.Win32;
+using System.Text.Json;
 
 namespace CrucioBackupper
 {
@@ -34,6 +34,11 @@ namespace CrucioBackupper
         private DataTemplate videoMessageContentTemplate;
         private readonly ZipArchive archive;
         private readonly HashSet<string> extractedFiles = new HashSet<string>();
+        private static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
+        {
+            IgnoreNullValues = true,
+            WriteIndented = true
+        };
 
         public string GetContentFilePath(string relativePath)
         {
@@ -56,7 +61,7 @@ namespace CrucioBackupper
             } while (Directory.Exists(resourceDirectory));
             Directory.CreateDirectory(resourceDirectory);
 
-            collectionModel = JsonConvert.DeserializeObject<CollectionModel>(File.ReadAllText(GetContentFilePath("Manifest.json"), Encoding.UTF8));
+            collectionModel = JsonSerializer.Deserialize<CollectionModel>(File.ReadAllText(GetContentFilePath("Manifest.json"), Encoding.UTF8), serializerOptions);
             InitializeComponent();
 
             leftChatMessageTemplate = this.FindResource("LeftChatMessageTemplate") as DataTemplate;
@@ -103,8 +108,7 @@ namespace CrucioBackupper
             {
                 return;
             }
-
-            var storyModel = JsonConvert.DeserializeObject<StoryModel>(File.ReadAllText(GetContentFilePath($"Story/{selected.Seq}.json"), Encoding.UTF8));
+            var storyModel = JsonSerializer.Deserialize<StoryModel>(File.ReadAllText(GetContentFilePath($"Story/{selected.Seq}.json"), Encoding.UTF8), serializerOptions);
             foreach (var dialog in storyModel.Dialogs)
             {
                 FrameworkElement content;
