@@ -188,7 +188,7 @@ namespace CrucioBackupper.Crucio
                 CurrentStoryUuid = storyBrief.Uuid,
                 Dialogs = new List<DialogBrief>()
             };
-            var dialogInfo = await GetDialogInfo(storyBrief.Uuid, -1, -1);
+            var dialogInfo = await GetDialogInfo(storyBrief.Uuid, 0, 20);
             if (dialogInfo.HasError)
             {
                 return dialogInfo;
