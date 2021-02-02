@@ -83,7 +83,23 @@
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center"/>
                                 <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
-                                    <TextBlock Text="{Binding ShareUuid, StringFormat=KN号：\{0\}}" />
+                                    <TextBlock>
+                                        <Run>
+                                            <Run.Style>
+                                                <Style TargetType="Run">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsVideo}" Value="False">
+                                                            <Setter Property="Text" Value="KN号：" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsVideo}" Value="True">
+                                                            <Setter Property="Text"  Value="KV号：" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Run.Style>
+                                        </Run>
+                                        <Run><Binding Path="ShareUuid" /></Run>
+                                    </TextBlock>
                                 </Border>
                                 <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
                                     <TextBlock Text="{Binding ClickCountDesc, StringFormat=点击数：\{0\}}" />

@@ -50,7 +50,9 @@ namespace CrucioBackupper
                 };
                 try
                 {
-                    viewModel.CoverUuid = firstStoryMap[item.Uuid].CoverUuid;
+                    var firstStory = firstStoryMap[item.Uuid];
+                    viewModel.CoverUuid = firstStory.CoverUuid;
+                    viewModel.IsVideo = firstStory.IsVideoType;
                 }
                 catch (Exception)
                 {
