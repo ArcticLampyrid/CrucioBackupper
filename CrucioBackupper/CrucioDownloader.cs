@@ -97,7 +97,7 @@ namespace CrucioBackupper
                     storyDetail.MakeSureNoError();
                     dialogInfo.MakeSureNoError();
 
-                    var characterMap = storyDetail.Data.StoriesEx[0].Characters.ToDictionary(
+                    var characterMap = storyDetail.Data.StoriesEx[0].Characters.DistinctBy(x => x.Uuid).ToDictionary(
                         x => x.Uuid,
                         x => new CharacterModel()
                         {
