@@ -92,6 +92,7 @@ namespace CrucioBackupper
         {
             try
             {
+                archive.Dispose();
                 Directory.Delete(resourceDirectory, true);
             }
             catch (Exception)
