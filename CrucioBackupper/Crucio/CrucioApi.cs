@@ -129,7 +129,7 @@ namespace CrucioBackupper.Crucio
         {
             var timestamp = (long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds;
             var queryList = HttpUtility.ParseQueryString(request.RequestUri.Query);
-            var queryInfo = string.Join("&", queryList.AllKeys.Select(x => $"{Uri.EscapeDataString(x)}={Uri.EscapeDataString(queryList[x]).Replace("%3D", "%253D")}"));
+            var queryInfo = string.Join("&", queryList.AllKeys.OrderBy(x => x).Select(x => $"{Uri.EscapeDataString(x)}={Uri.EscapeDataString(queryList[x]).Replace("%3D", "%253D")}"));
             var requestBodySHA256 = SHA256.Create().ComputeHash(request.Content != null
                 ? await request.Content.ReadAsStreamAsync()
                 : Stream.Null).ToLowerCaseHexString();
