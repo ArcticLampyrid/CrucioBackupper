@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace CrucioBackupper.Crucio.Model
+namespace CrucioNetwork.Model
 {
     public class SearchResult
     {

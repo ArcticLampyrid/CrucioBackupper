@@ -1,4 +1,4 @@
-﻿namespace CrucioBackupper.Crucio.Model
+﻿namespace CrucioNetwork.Model
 {
     public class UserBriefEx
     {

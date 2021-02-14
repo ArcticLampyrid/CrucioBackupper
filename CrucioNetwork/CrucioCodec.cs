@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.IO.Compression;
 
-namespace CrucioBackupper.Crucio
+namespace CrucioNetwork
 {
     public static class CrucioCodec
     {

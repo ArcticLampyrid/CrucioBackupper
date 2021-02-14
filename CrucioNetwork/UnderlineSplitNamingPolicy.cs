@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace CrucioBackupper
+namespace CrucioNetwork
 {
-    public class UnderlineSplitNamingPolicy : JsonNamingPolicy
+    internal class UnderlineSplitNamingPolicy : JsonNamingPolicy
     {
         public override string ConvertName(string name)
         {

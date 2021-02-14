@@ -6,12 +6,12 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Net;
-using CrucioBackupper.Crucio.Model;
+using CrucioNetwork.Model;
 using System.Security.Cryptography;
 using System.Web;
 using System.Text.Json;
 
-namespace CrucioBackupper.Crucio
+namespace CrucioNetwork
 {
     public static class CrucioApi
     {
@@ -160,7 +160,7 @@ namespace CrucioBackupper.Crucio
 
         public static async Task<ApiResult<SearchResult>> Search(string target)
         {
-            using var content = new FormUrlEncodedContent(new Dictionary<string, string> {
+            var content = new FormUrlEncodedContent(new Dictionary<string, string> {
                 { "q", target }
             });
             return await DeserializeObject<ApiResult<SearchResult>>(await ApiGet("/v7/search?" + await content.ReadAsStringAsync()));

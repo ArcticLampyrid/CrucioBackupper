@@ -1,5 +1,5 @@
-﻿using CrucioBackupper.Crucio;
-using CrucioBackupper.Crucio.Model;
+﻿using CrucioNetwork;
+using CrucioNetwork.Model;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

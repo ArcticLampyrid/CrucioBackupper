@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CrucioBackupper.Crucio.Model
+namespace CrucioNetwork.Model
 {
     public class DialogInfo
     {

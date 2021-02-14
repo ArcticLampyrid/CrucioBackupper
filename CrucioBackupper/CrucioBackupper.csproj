@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CrucioNetwork\CrucioNetwork.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="WebpCodecSetup.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
