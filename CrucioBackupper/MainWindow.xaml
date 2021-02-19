@@ -39,8 +39,8 @@
                 本工具仅用于想要退出快点的作家备份自己的文章<LineBreak />
                 请您确保您对保存的文章拥有版权<LineBreak />
                 友情提醒：签约作者的作品，其版权可能在平台手中，具体请参考您的合约<LineBreak />
-                当前版本：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper/releases" Click="Hyperlink_Click"><Run Text="{Binding VersionDesc, Mode=OneWay}" /></Hyperlink><LineBreak />
-                本工具完全开源，主页地址：<Hyperlink NavigateUri="https://github.com/1354092549/CrucioBackupper" Click="Hyperlink_Click">https://github.com/1354092549/CrucioBackupper</Hyperlink></TextBlock>
+                当前版本：<Hyperlink NavigateUri="https://github.com/ArcticLampyrid/CrucioBackupper/releases" Click="Hyperlink_Click"><Run Text="{Binding VersionDesc, Mode=OneWay}" /></Hyperlink><LineBreak />
+                本工具完全开源，主页地址：<Hyperlink NavigateUri="https://github.com/ArcticLampyrid/CrucioBackupper" Click="Hyperlink_Click">https://github.com/ArcticLampyrid/CrucioBackupper</Hyperlink></TextBlock>
         </Label>
         <StackPanel DockPanel.Dock="Bottom">
             <DockPanel>
