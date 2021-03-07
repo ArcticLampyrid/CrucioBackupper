@@ -180,19 +180,19 @@ namespace CrucioNetwork
             return await DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v10/story/{uuid}/basis"));
         }
 
-        public static async Task<ApiResult<DialogInfo>> GetDialogInfo(string uuid, int start, int end)
+        public static async Task<ApiResult<DialogInfo>> GetDialogFragment(string uuid, int start, int end)
         {
             return await DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v10/story/{uuid}/dialogs?start={start}&end={end}"));
         }
 
-        public static async Task<ApiResult<DialogInfo>> GetAllDialogInfo(StoryBrief storyBrief)
+        public static async Task<ApiResult<DialogInfo>> GetAllDialog(StoryBrief storyBrief)
         {
             var result = new DialogInfo()
             {
                 CurrentStoryUuid = storyBrief.Uuid,
                 Dialogs = new List<DialogBrief>()
             };
-            var dialogInfo = await GetDialogInfo(storyBrief.Uuid, 0, 20);
+            var dialogInfo = await GetDialogFragment(storyBrief.Uuid, 0, 20);
             if (dialogInfo.HasError)
             {
                 return dialogInfo;
@@ -200,7 +200,7 @@ namespace CrucioNetwork
             result.Dialogs.AddRange(dialogInfo.Data.Dialogs);
             while (result.Dialogs.Count < storyBrief.DialogCount)
             {
-                dialogInfo = await CrucioApi.GetDialogInfo(storyBrief.Uuid, result.Dialogs.Count, result.Dialogs.Count + 20);
+                dialogInfo = await GetDialogFragment(storyBrief.Uuid, result.Dialogs.Count, result.Dialogs.Count + 20);
                 if (dialogInfo.HasError)
                 {
                     return dialogInfo;
@@ -212,6 +212,11 @@ namespace CrucioNetwork
                 result.Dialogs.AddRange(dialogInfo.Data.Dialogs);
             }
             return new ApiResult<DialogInfo>(result);
+        }
+
+        public static async Task<ApiResult<UserMomentBrief>> GetUserMomentFragment(string uuid, int cursor = 0)
+        {
+            return await DeserializeObject<ApiResult<UserMomentBrief>>(await ApiGet($"/v6/profile/{uuid}/moments" + (cursor == 0 ? "" : $"?cursor={cursor}")));
         }
 
         public static string GetImageUrl(string uuid)

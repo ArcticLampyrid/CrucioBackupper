@@ -82,7 +82,7 @@ namespace CrucioBackupper
                 .ToList();
             string coverUuid = null;
             var storiesDetail = stories.Select(x => CrucioApi.GetStoryDetail(x.Uuid)).ToList();
-            var dealogInfos = stories.Select(x => CrucioApi.GetAllDialogInfo(x)).ToList();
+            var dealogInfos = stories.Select(x => CrucioApi.GetAllDialog(x)).ToList();
             for (int i = 0; i < stories.Count; i++)
             {
                 StoryBrief storyBrief = stories[i];

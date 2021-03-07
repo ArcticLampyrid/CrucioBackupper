@@ -29,6 +29,8 @@ namespace CrucioNetwork.Model
         public bool IsVideoType { get; set; }
         [JsonPropertyName("name")]
         public string Name { get; set; }
+        [JsonPropertyName("interaction_type")]
+        public string InteractionType { get; set; }
         [JsonPropertyName("style")]
         public int Style { get; set; }
         [JsonPropertyName("title")]

@@ -38,5 +38,11 @@ namespace CrucioNetwork.Model
         public AudioInfo Audio { get; set; }
         [JsonPropertyName("video")]
         public VideoInfo Video { get; set; }
+        [JsonPropertyName("red_packet")]
+        public RedPacketInfo RedPacket { get; set; }
+        [JsonPropertyName("audio_clip")]
+        public AudioClipInfo AudioClip { get; set; }
+        [JsonPropertyName("video_clip")]
+        public VideoClipInfo VideoClip { get; set; }
     }
 }
