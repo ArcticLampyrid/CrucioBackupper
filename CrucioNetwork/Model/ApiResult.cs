@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace CrucioNetwork.Model
 {
@@ -15,9 +16,13 @@ namespace CrucioNetwork.Model
             Data = data;
         }
 
+        [JsonPropertyName("code")]
         public int Code { get; set; }
+        [JsonPropertyName("data")]
         public T Data { get; set; }
+        [JsonPropertyName("msg")]
         public string Msg { get; set; }
+        [JsonPropertyName("timestamp")]
         public long Timestamp { get; set; }
 
         public override string ToString()
@@ -25,6 +30,7 @@ namespace CrucioNetwork.Model
             return CrucioApi.SerializeObject(this);
         }
 
+        [JsonIgnore]
         public bool HasError => Code != 0;
         public void MakeSureNoError()
         {
@@ -32,6 +38,12 @@ namespace CrucioNetwork.Model
             {
                 throw new Exception($"(Code: {Code}) {Msg}");
             }
+        }
+
+        public T GetDataOrFail()
+        {
+            MakeSureNoError();
+            return Data;
         }
     }
 }

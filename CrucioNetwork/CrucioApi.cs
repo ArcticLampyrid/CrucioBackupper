@@ -28,12 +28,16 @@ namespace CrucioNetwork
 
         public static void SetToken(string token) 
         {
-            cookieContainer.Add(new Cookie("token", token, "/", ApiDomain));
+            var cookie = new Cookie("token", token ?? "", "/", ApiDomain);
+            if (string.IsNullOrEmpty(token))
+            {
+                cookie.Expired = true;
+            }
+            cookieContainer.Add(cookie);
         }
 
-        private static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
+        private static readonly JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
         {
-            PropertyNamingPolicy = new UnderlineSplitNamingPolicy(),
             IgnoreNullValues = true
         };
 
