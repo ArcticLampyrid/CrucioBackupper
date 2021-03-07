@@ -35,9 +35,12 @@ namespace CrucioBackupper
         {
             var result = await CrucioApi.Search(SearchContentTextBox.Text);
             var source = new List<CollectionViewModel>();
-            var firstStoryMap = result.Data.Stories.ToDictionary(x => x.CollectionUuid);
-            foreach (var item in result.Data.Collections.OrderByDescending(x => x.ClickCount))
+            var collectionMap = result.Data.Collections.ToDictionary(x => x.Uuid);
+            var storyMap = result.Data.Stories.ToDictionary(x => x.Uuid);
+            foreach (var uuid in result.Data.SearchStoryUuids.List)
             {
+                var story = storyMap[uuid];
+                var item = collectionMap[story.CollectionUuid];
                 var viewModel = new CollectionViewModel()
                 {
                     Name = item.Name,
@@ -46,17 +49,10 @@ namespace CrucioBackupper
                     Uuid = item.Uuid,
                     ClickCount = item.ClickCount,
                     LikeCount = item.LikeCount,
-                    ShareUuid = item.ShareUuid
+                    ShareUuid = item.ShareUuid,
+                    CoverUuid = story.CoverUuid,
+                    IsVideo = story.IsVideoType
                 };
-                try
-                {
-                    var firstStory = firstStoryMap[item.Uuid];
-                    viewModel.CoverUuid = firstStory.CoverUuid;
-                    viewModel.IsVideo = firstStory.IsVideoType;
-                }
-                catch (Exception)
-                {
-                }
                 source.Add(viewModel);
             }
             SearchResultListView.ItemsSource = source;
