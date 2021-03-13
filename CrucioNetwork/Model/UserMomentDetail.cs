@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace CrucioNetwork.Model
 {
-    public class UserMomentBrief : BaseMomentDetail
+    public class UserMomentDetail : BaseMomentDetail
     {
         [JsonPropertyName("user_moment_uuids")]
         public UuidListInfo UserMomentUuids { get; set; }
