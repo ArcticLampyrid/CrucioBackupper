@@ -26,6 +26,7 @@ namespace CrucioBackupper
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly CrucioApi api = CrucioApi.Default;
         public MainWindow()
         {
             InitializeComponent();
@@ -33,7 +34,7 @@ namespace CrucioBackupper
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            var result = await CrucioApi.Search(SearchContentTextBox.Text);
+            var result = await api.Search(SearchContentTextBox.Text);
             var source = new List<CollectionViewModel>();
             var collectionMap = result.Data.Collections.ToDictionary(x => x.Uuid);
             var storyMap = result.Data.Stories.ToDictionary(x => x.Uuid);
@@ -83,9 +84,9 @@ namespace CrucioBackupper
                 {
                     File.Delete(path);
                 }
-                CrucioApi.SetToken(TokenTextBox.Text);
+                api.SetToken(TokenTextBox.Text);
                 using var target = ZipFile.Open(path, ZipArchiveMode.Create);
-                await new CrucioDownloader(collectionUuid, target).Download();
+                await new CrucioDownloader(api, collectionUuid, target).Download();
             }
             finally 
             {

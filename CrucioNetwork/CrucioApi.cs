@@ -13,20 +13,32 @@ using System.Text.Json;
 
 namespace CrucioNetwork
 {
-    public static class CrucioApi
+    public class CrucioApi
     {
+        public static CrucioApi Default { get; } = new CrucioApi();
+
         private const string ApiDomain = "api.crucio.hecdn.com";
         private const string ImageDomain = "qc.i.hecdn.com";
 
-        private static CookieContainer cookieContainer = new CookieContainer();
-        private static readonly HttpClient client = new HttpClient(new HttpClientHandler()
-        {
-            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-            UseCookies = true,
-            CookieContainer = cookieContainer
-        });
+        private readonly CookieContainer cookieContainer = new CookieContainer();
+        private readonly HttpClient client;
 
-        public static void SetToken(string token) 
+        public CrucioApi(string uid = null)
+        {
+            if (string.IsNullOrEmpty(uid))
+            {
+                uid = GenerateUid(new Random());
+            }
+            client = new HttpClient(new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                UseCookies = true,
+                CookieContainer = cookieContainer
+            });
+            client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/4.01.03.1 (Android/28;Build/HUAWEI GLK-AL00;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
+        }
+
+        public void SetToken(string token) 
         {
             var cookie = new Cookie("token", token ?? "", "/", ApiDomain);
             if (string.IsNullOrEmpty(token))
@@ -41,12 +53,12 @@ namespace CrucioNetwork
             IgnoreNullValues = true
         };
 
-        public async static Task<T> DeserializeObject<T>(Stream stream)
+        internal static async Task<T> DeserializeObject<T>(Stream stream)
         {
             return await JsonSerializer.DeserializeAsync<T>(stream, serializerOptions);
         }
 
-        public static string SerializeObject(object data)
+        internal static string SerializeObject(object data)
         {
             return JsonSerializer.Serialize(data, serializerOptions);
         }
@@ -111,14 +123,8 @@ namespace CrucioNetwork
         }
         #endregion Uid
 
-        static CrucioApi()
-        {
-            var random = new Random();
-            var uid = GenerateUid(random);
-            client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/4.01.03.1 (Android/28;Build/HUAWEI GLK-AL00;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
-        }
 
-        private static string ToLowerCaseHexString(this byte[] bytes)
+        private static string ToLowerCaseHexString(byte[] bytes)
         {
             var sb = new StringBuilder();
             foreach (var t in bytes)
@@ -128,28 +134,28 @@ namespace CrucioNetwork
             return sb.ToString();
         }
 
-        public static async Task<Stream> ApiGet(string path)
+        public async Task<Stream> ApiGet(string path)
         {
             var url = $"https://{ApiDomain}{path}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             return await HttpRequest(request);
         }
 
-        public static async Task<Stream> HttpRequest(HttpRequestMessage request)
+        public async Task<Stream> HttpRequest(HttpRequestMessage request)
         {
             var timestamp = (long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds;
             var queryList = HttpUtility.ParseQueryString(request.RequestUri.Query);
             var queryInfo = string.Join("&", queryList.AllKeys.OrderBy(x => x).Select(x => $"{Uri.EscapeDataString(x)}={Uri.EscapeDataString(queryList[x]).Replace("%3D", "%253D")}"));
-            var requestBodySHA256 = SHA256.Create().ComputeHash(request.Content != null
+            var requestBodySHA256 = ToLowerCaseHexString(SHA256.Create().ComputeHash(request.Content != null
                 ? await request.Content.ReadAsStreamAsync()
-                : Stream.Null).ToLowerCaseHexString();
+                : Stream.Null));
             var requestInfo = $"{request.Method.Method}\n{request.RequestUri.AbsolutePath}\n{queryInfo}\nx-crucio-timestamp:{timestamp}\n{requestBodySHA256}";
-            var requestInfoSHA256 = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(requestInfo)).ToLowerCaseHexString();
+            var requestInfoSHA256 = ToLowerCaseHexString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(requestInfo)));
             var signInfo = $"KD1\n{timestamp}\nb975487c3cc1867a9a0bd87a63aae258ac776a06\n{requestInfoSHA256}";
             var hmacKey = request.RequestUri.Host == ApiDomain
                 ? Encoding.UTF8.GetBytes("ae2ce93f486b638849f6f438c3b38d3a") 
                 : Encoding.UTF8.GetBytes("0e666341456764fcb3184767adcf2884");
-            var sign = new HMACSHA256(hmacKey).ComputeHash(Encoding.UTF8.GetBytes(signInfo)).ToLowerCaseHexString();
+            var sign = ToLowerCaseHexString(new HMACSHA256(hmacKey).ComputeHash(Encoding.UTF8.GetBytes(signInfo)));
             request.Headers.Add("X-Crucio-Timestamp", timestamp.ToString());
             request.Headers.Add("Authorization", $"KD1 Credential=10001, Signature={sign}");
 
@@ -162,7 +168,7 @@ namespace CrucioNetwork
             return result;
         }
 
-        public static async Task<ApiResult<SearchResult>> Search(string target)
+        public async Task<ApiResult<SearchResult>> Search(string target)
         {
             var content = new FormUrlEncodedContent(new Dictionary<string, string> {
                 { "q", target }
@@ -170,22 +176,22 @@ namespace CrucioNetwork
             return await DeserializeObject<ApiResult<SearchResult>>(await ApiGet("/v7/search?" + await content.ReadAsStringAsync()));
         }
 
-        public static async Task<ApiResult<CollectionDetail>> GetCollectionDetail(string uuid)
+        public async Task<ApiResult<CollectionDetail>> GetCollectionDetail(string uuid)
         {
             return await DeserializeObject<ApiResult<CollectionDetail>>(await ApiGet($"/v6/collection/{uuid}"));
         }
 
-        public static async Task<ApiResult<StoryDetail>> GetStoryDetail(string uuid)
+        public async Task<ApiResult<StoryDetail>> GetStoryDetail(string uuid)
         {
             return await DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v10/story/{uuid}/basis"));
         }
 
-        public static async Task<ApiResult<DialogInfo>> GetDialogFragment(string uuid, int start, int end)
+        public async Task<ApiResult<DialogInfo>> GetDialogFragment(string uuid, int start, int end)
         {
             return await DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v10/story/{uuid}/dialogs?start={start}&end={end}"));
         }
 
-        public static async Task<ApiResult<DialogInfo>> GetAllDialog(StoryBrief storyBrief)
+        public async Task<ApiResult<DialogInfo>> GetAllDialog(StoryBrief storyBrief)
         {
             var result = new DialogInfo()
             {
@@ -214,7 +220,7 @@ namespace CrucioNetwork
             return new ApiResult<DialogInfo>(result);
         }
 
-        public static async Task<ApiResult<UserMomentBrief>> GetUserMomentFragment(string uuid, int cursor = 0)
+        public async Task<ApiResult<UserMomentBrief>> GetUserMomentFragment(string uuid, int cursor = 0)
         {
             return await DeserializeObject<ApiResult<UserMomentBrief>>(await ApiGet($"/v6/profile/{uuid}/moments" + (cursor == 0 ? "" : $"?cursor={cursor}")));
         }

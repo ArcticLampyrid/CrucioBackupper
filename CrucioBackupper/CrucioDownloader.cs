@@ -19,6 +19,7 @@ namespace CrucioBackupper
 {
     class CrucioDownloader
     {
+        private readonly CrucioApi api;
         private readonly string collectionUuid;
         private readonly ZipArchive target;
 
@@ -31,8 +32,9 @@ namespace CrucioBackupper
             WriteIndented = true
         };
 
-        public CrucioDownloader(string collectionUuid, ZipArchive target)
+        public CrucioDownloader(CrucioApi api, string collectionUuid, ZipArchive target)
         {
+            this.api = api ?? throw new ArgumentNullException(nameof(api));
             this.collectionUuid = collectionUuid ?? throw new ArgumentNullException(nameof(collectionUuid));
             this.target = target ?? throw new ArgumentNullException(nameof(target));
         }
@@ -49,14 +51,14 @@ namespace CrucioBackupper
             await JsonSerializer.SerializeAsync(stream, model, serializerOptions);
         }
 
-        public async Task DownloadResource(string type, string uuid, string ext, string url)
+        private async Task DownloadResource(string type, string uuid, string ext, string url)
         {
             using var targetStream = target.CreateEntry($"{type}/{uuid}.{ext}", CompressionLevel.NoCompression).Open();
-            using var networkStream = await CrucioApi.HttpRequest(new HttpRequestMessage(HttpMethod.Get, url));
+            using var networkStream = await api.HttpRequest(new HttpRequestMessage(HttpMethod.Get, url));
             await networkStream.CopyToAsync(targetStream);
         }
 
-        public async Task DownloadResource()
+        private async Task DownloadResource()
         {
             var tasks = ImageSet.Select(x => DownloadResource("Image", x, "webp", CrucioApi.GetImageUrl(x)))
                 .Concat(AudioMap.Select(x => DownloadResource("Audio", x.Key, "m4a", x.Value)))
@@ -75,14 +77,14 @@ namespace CrucioBackupper
 
         public async Task Download()
         {
-            var collectionDetail = await CrucioApi.GetCollectionDetail(collectionUuid);
+            var collectionDetail = await api.GetCollectionDetail(collectionUuid);
             var stories = collectionDetail.Data.Stories
                 .Where(x => x.CollectionUuid == collectionUuid)
                 .OrderBy(x => x.Index)
                 .ToList();
             string coverUuid = null;
-            var storiesDetail = stories.Select(x => CrucioApi.GetStoryDetail(x.Uuid)).ToList();
-            var dealogInfos = stories.Select(x => CrucioApi.GetAllDialog(x)).ToList();
+            var storiesDetail = stories.Select(x => api.GetStoryDetail(x.Uuid)).ToList();
+            var dealogInfos = stories.Select(x => api.GetAllDialog(x)).ToList();
             for (int i = 0; i < stories.Count; i++)
             {
                 StoryBrief storyBrief = stories[i];
