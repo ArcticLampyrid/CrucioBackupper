@@ -220,9 +220,14 @@ namespace CrucioNetwork
             return new ApiResult<DialogInfo>(result);
         }
 
-        public async Task<ApiResult<UserMomentDetail>> GetUserMomentFragment(string uuid, int cursor = 0)
+        public async Task<ApiResult<UserMomentDetail>> GetUserMomentFragment(string uuid, string cursor = null)
         {
-            return await DeserializeObject<ApiResult<UserMomentDetail>>(await ApiGet($"/v6/profile/{uuid}/moments" + (cursor == 0 ? "" : $"?cursor={cursor}")));
+            return await DeserializeObject<ApiResult<UserMomentDetail>>(await ApiGet($"/v6/profile/{uuid}/moments" + (string.IsNullOrEmpty(cursor) ? "" : $"?cursor={cursor}")));
+        }
+
+        public async Task<ApiResult<UserStoryDetail>> GetUserStoryFragment(string uuid, string cursor = null)
+        {
+            return await DeserializeObject<ApiResult<UserStoryDetail>>(await ApiGet($"/v6/profile/{uuid}/stories" + (string.IsNullOrEmpty(cursor) ? "" : $"?cursor={cursor}")));
         }
 
         public static string GetImageUrl(string uuid)

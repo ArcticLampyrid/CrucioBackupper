@@ -9,5 +9,7 @@ namespace CrucioNetwork.Model
     {
         [JsonPropertyName("user_moment_uuids")]
         public UuidListInfo UserMomentUuids { get; set; }
+        [JsonPropertyName("top_user_moment_uuids")]
+        public UuidListInfo TopUserMomentUuids { get; set; }
     }
 }
