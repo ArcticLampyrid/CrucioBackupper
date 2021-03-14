@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CrucioNetwork.Utils;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -14,7 +15,8 @@ namespace CrucioNetwork.Model
         [JsonPropertyName("comment_count")]
         public int CommentCount { get; set; }
         [JsonPropertyName("create_time")]
-        public long CreateTime { get; set; }
+        [JsonConverter(typeof(JsonUnixTimeMillisecondsConverter))]
+        public DateTimeOffset CreateTime { get; set; }
         [JsonPropertyName("c_discussion_uuid")]
         public long CDiscussionUuid { get; set; }
         [JsonPropertyName("from_tag_names")]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CrucioNetwork.Utils;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -9,7 +10,7 @@ namespace CrucioNetwork.Model
     {
         public ApiResult()
         {
-            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            Timestamp = DateTimeOffset.UtcNow;
         }
         public ApiResult(T data) : this()
         {
@@ -23,7 +24,8 @@ namespace CrucioNetwork.Model
         [JsonPropertyName("msg")]
         public string Msg { get; set; }
         [JsonPropertyName("timestamp")]
-        public long Timestamp { get; set; }
+        [JsonConverter(typeof(JsonUnixTimeMillisecondsConverter))]
+        public DateTimeOffset Timestamp { get; set; }
 
         public override string ToString()
         {
