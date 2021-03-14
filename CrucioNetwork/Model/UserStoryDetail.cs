@@ -14,7 +14,7 @@ namespace CrucioNetwork.Model
         [JsonPropertyName("users")]
         public List<UserBrief> Users { get; set; }
         [JsonPropertyName("xstories")]
-        public List<StoryBriefEx> Xstories { get; set; }
+        public List<StoryBriefEx> StoriesEx { get; set; }
         [JsonPropertyName("user_story_uuids")]
         public UuidListInfo UserStoryUuids { get; set; }
         [JsonPropertyName("top_user_story_uuids")]

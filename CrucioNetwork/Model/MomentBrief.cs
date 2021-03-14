@@ -18,7 +18,7 @@ namespace CrucioNetwork.Model
         [JsonConverter(typeof(JsonUnixTimeMillisecondsConverter))]
         public DateTimeOffset CreateTime { get; set; }
         [JsonPropertyName("c_discussion_uuid")]
-        public long CDiscussionUuid { get; set; }
+        public string CDiscussionUuid { get; set; }
         [JsonPropertyName("from_tag_names")]
         public List<string> FromTagNames { get; set; }
         [JsonPropertyName("images")]
