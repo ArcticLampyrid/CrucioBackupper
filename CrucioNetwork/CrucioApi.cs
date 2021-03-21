@@ -38,7 +38,7 @@ namespace CrucioNetwork
             client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/4.01.03.1 (Android/28;Build/HUAWEI GLK-AL00;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
         }
 
-        public void SetToken(string token) 
+        public void SetToken(string token)
         {
             var cookie = new Cookie("token", token ?? "", "/", ApiDomain);
             if (string.IsNullOrEmpty(token))
@@ -75,22 +75,19 @@ namespace CrucioNetwork
         {
             var reportingBodyIds = new string[] { "01", "10", "30", "33", "35", "44", "45", "49", "50", "51", "52", "53", "54", "86", "91", "98", "99" };
             var builder = new StringBuilder();
-            builder.Append(random.Next(0, reportingBodyIds.Length));
+            builder.Append(reportingBodyIds[random.Next(reportingBodyIds.Length)]);
             builder.AppendFormat("{0:000000}", random.Next(0, 1000000));
             builder.AppendFormat("{0:000000}", random.Next(0, 1000000));
             int checksum = 0;
             for (int i = 0; i < builder.Length; i += 2)
             {
-                checksum += Convert.ToInt32(builder[i]);
-            }
-            for (int i = 1; i < builder.Length; i += 2)
-            {
-                var doubleValue = Convert.ToInt32(builder[i]) * 2;
+                checksum += builder[i] - '0';
+                var doubleValue = (builder[i + 1] - '0') * 2;
                 checksum += doubleValue % 10;
                 checksum += doubleValue / 10;
             }
             int finalDigit = (10 - (checksum % 10)) % 10;
-            builder.Append(finalDigit);
+            builder.Append((char)(finalDigit + '0'));
             return builder.ToString();
         }
         private static string GenerateDeviceId(Random random)
@@ -153,7 +150,7 @@ namespace CrucioNetwork
             var requestInfoSHA256 = ToLowerCaseHexString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(requestInfo)));
             var signInfo = $"KD1\n{timestamp}\nb975487c3cc1867a9a0bd87a63aae258ac776a06\n{requestInfoSHA256}";
             var hmacKey = request.RequestUri.Host == ApiDomain
-                ? Encoding.UTF8.GetBytes("ae2ce93f486b638849f6f438c3b38d3a") 
+                ? Encoding.UTF8.GetBytes("ae2ce93f486b638849f6f438c3b38d3a")
                 : Encoding.UTF8.GetBytes("0e666341456764fcb3184767adcf2884");
             var sign = ToLowerCaseHexString(new HMACSHA256(hmacKey).ComputeHash(Encoding.UTF8.GetBytes(signInfo)));
             request.Headers.Add("X-Crucio-Timestamp", timestamp.ToString());
