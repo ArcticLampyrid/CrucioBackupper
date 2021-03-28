@@ -124,8 +124,15 @@ namespace CrucioNetwork
         }
         #endregion Uid
 
+        public async Task<T> ApiGet<T>(string path)
+        {
+            using (var stream = await ApiGetStream(path))
+            {
+                return await JsonSerializer.DeserializeAsync<T>(stream, serializerOptions);
+            }
+        }
 
-        public async Task<Stream> ApiGet(string path)
+        public async Task<Stream> ApiGetStream(string path)
         {
             var url = $"https://{ApiDomain}{path}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -162,22 +169,22 @@ namespace CrucioNetwork
             var content = new FormUrlEncodedContent(new Dictionary<string, string> {
                 { "q", target }
             });
-            return await DeserializeObject<ApiResult<SearchResult>>(await ApiGet("/v7/search?" + await content.ReadAsStringAsync()));
+            return await ApiGet<ApiResult<SearchResult>>("/v7/search?" + await content.ReadAsStringAsync());
         }
 
         public async Task<ApiResult<CollectionDetail>> GetCollectionDetail(string uuid)
         {
-            return await DeserializeObject<ApiResult<CollectionDetail>>(await ApiGet($"/v6/collection/{uuid}"));
+            return await ApiGet<ApiResult<CollectionDetail>>($"/v6/collection/{uuid}");
         }
 
         public async Task<ApiResult<StoryDetail>> GetStoryDetail(string uuid)
         {
-            return await DeserializeObject<ApiResult<StoryDetail>>(await ApiGet($"/v10/story/{uuid}/basis"));
+            return await ApiGet<ApiResult<StoryDetail>>($"/v10/story/{uuid}/basis");
         }
 
         public async Task<ApiResult<DialogInfo>> GetDialogFragment(string uuid, int start, int end)
         {
-            return await DeserializeObject<ApiResult<DialogInfo>>(await ApiGet($"/v10/story/{uuid}/dialogs?start={start}&end={end}"));
+            return await ApiGet<ApiResult<DialogInfo>>($"/v10/story/{uuid}/dialogs?start={start}&end={end}");
         }
 
         public async Task<ApiResult<DialogInfo>> GetAllDialog(StoryBrief storyBrief)
@@ -211,12 +218,12 @@ namespace CrucioNetwork
 
         public async Task<ApiResult<UserMomentDetail>> GetUserMomentFragment(string uuid, string cursor = null)
         {
-            return await DeserializeObject<ApiResult<UserMomentDetail>>(await ApiGet($"/v6/profile/{uuid}/moments" + (string.IsNullOrEmpty(cursor) ? "" : $"?cursor={cursor}")));
+            return await ApiGet<ApiResult<UserMomentDetail>>($"/v6/profile/{uuid}/moments" + (string.IsNullOrEmpty(cursor) ? "" : $"?cursor={cursor}"));
         }
 
         public async Task<ApiResult<UserStoryDetail>> GetUserStoryFragment(string uuid, string cursor = null)
         {
-            return await DeserializeObject<ApiResult<UserStoryDetail>>(await ApiGet($"/v6/profile/{uuid}/stories" + (string.IsNullOrEmpty(cursor) ? "" : $"?cursor={cursor}")));
+            return await ApiGet<ApiResult<UserStoryDetail>>($"/v6/profile/{uuid}/stories" + (string.IsNullOrEmpty(cursor) ? "" : $"?cursor={cursor}"));
         }
 
         public static string GetImageUrl(string uuid)
