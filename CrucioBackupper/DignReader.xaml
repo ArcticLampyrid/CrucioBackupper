@@ -14,9 +14,9 @@
             <local:BorderClipConverter x:Key="BorderClipConverter" />
             <DataTemplate x:Key="LeftChatMessageTemplate">
                 <DockPanel HorizontalAlignment="Left" Margin="5">
-                    <Image Source="{Binding AvatarPath}" RenderOptions.BitmapScalingMode="HighQuality" Width="40" Height="40" DockPanel.Dock="Left" VerticalAlignment="Top">
+                    <Image Source="{Binding AvatarPath}" RenderOptions.BitmapScalingMode="HighQuality" Width="36" Height="36" DockPanel.Dock="Left" VerticalAlignment="Top" Margin="0,0,2,0">
                         <Image.Clip>
-                            <EllipseGeometry RadiusX="20" RadiusY="20" Center="20,20"/>
+                            <EllipseGeometry RadiusX="18" RadiusY="18" Center="18,18"/>
                         </Image.Clip>
                         <Image.ContextMenu>
                             <ContextMenu>
@@ -24,7 +24,7 @@
                             </ContextMenu>
                         </Image.ContextMenu>
                     </Image>
-                    <Label Content="{Binding CharacterName}" DockPanel.Dock="Top" HorizontalAlignment="Left" Foreground="DarkGray"/>
+                    <Label Content="{Binding CharacterName}" DockPanel.Dock="Top" HorizontalAlignment="Left" Foreground="DarkGray" Padding="0"/>
                     <Border Background="WhiteSmoke" CornerRadius="5" HorizontalAlignment="Left">
                         <Border.Clip>
                             <MultiBinding Converter="{StaticResource BorderClipConverter}">
@@ -39,9 +39,9 @@
             </DataTemplate>
             <DataTemplate x:Key="RightChatMessageTemplate">
                 <DockPanel HorizontalAlignment="Right" Margin="5">
-                    <Image Source="{Binding AvatarPath}" RenderOptions.BitmapScalingMode="HighQuality" Width="40" Height="40" DockPanel.Dock="Right" VerticalAlignment="Top">
+                    <Image Source="{Binding AvatarPath}" RenderOptions.BitmapScalingMode="HighQuality" Width="36" Height="36" DockPanel.Dock="Right" VerticalAlignment="Top" Margin="2,0,0,0">
                         <Image.Clip>
-                            <EllipseGeometry RadiusX="20" RadiusY="20" Center="20,20"/>
+                            <EllipseGeometry RadiusX="18" RadiusY="18" Center="18,18"/>
                         </Image.Clip>
                         <Image.ContextMenu>
                             <ContextMenu>
@@ -49,7 +49,7 @@
                             </ContextMenu>
                         </Image.ContextMenu>
                     </Image>
-                    <Label Content="{Binding CharacterName}" DockPanel.Dock="Top" HorizontalAlignment="Right" Foreground="DarkGray"/>
+                    <Label Content="{Binding CharacterName}" DockPanel.Dock="Top" HorizontalAlignment="Right" Foreground="DarkGray" Padding="0"/>
                     <Border Background="LightGreen" CornerRadius="5" HorizontalAlignment="Right">
                         <Border.Clip>
                             <MultiBinding Converter="{StaticResource BorderClipConverter}">
@@ -144,7 +144,9 @@
                         <TextBlock Text="{Binding StoryCount, StringFormat=共\{0\}话}"/>
                     </Label>
                     <Separator/>
-                    <Label Content="{Binding Desc}" />
+                    <Label>
+                        <TextBlock Text="{Binding Desc}" TextWrapping="Wrap"/>
+                    </Label>
                 </StackPanel>
             </TabItem>
             <TabItem Header="目录">
@@ -155,14 +157,14 @@
         <DockPanel DockPanel.Dock="Top">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Label VerticalAlignment="Center">缩放：</Label>
-                <Slider x:Name="ZoomSlider" Width="100" VerticalAlignment="Center" Orientation="Horizontal" Minimum="0.5" Maximum="5.0" LargeChange="0.25" SmallChange="0.1" Value="1.0" />
+                <Slider x:Name="ZoomSlider" Width="100" VerticalAlignment="Center" Orientation="Horizontal" Minimum="0.5" Maximum="5.0" LargeChange="0.25" SmallChange="0.1" Value="2.0" />
                 <Label VerticalAlignment="Center">
                     <TextBlock Text="{Binding ElementName=ZoomSlider, Path=Value, StringFormat=\{0:P\}}"/>
                 </Label>
             </StackPanel>
             <Label VerticalAlignment="Center" FontWeight="Bold" Content="{Binding ElementName=CatalogListView, Path=SelectedItem.DisplayName}" />
         </DockPanel>
-        <ScrollViewer x:Name="DialogScrollViewer" PanningMode="Both" PreviewMouseWheel="DialogScrollViewer_PreviewMouseWheel">
+        <ScrollViewer x:Name="DialogScrollViewer" PanningMode="VerticalOnly" PreviewMouseWheel="DialogScrollViewer_PreviewMouseWheel">
             <StackPanel Orientation="Vertical" x:Name="DialogStackPanel">
                 <StackPanel.LayoutTransform>
                     <ScaleTransform ScaleX="{Binding ElementName=ZoomSlider, Path=Value}" ScaleY="{Binding ElementName=ZoomSlider, Path=Value}" />
