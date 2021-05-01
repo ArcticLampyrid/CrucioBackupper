@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,4 +25,7 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <TrimmerRootAssembly Include="System.Runtime.InteropServices" />
+  </ItemGroup>
 </Project>
