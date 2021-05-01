@@ -138,5 +138,17 @@ namespace CrucioBackupper
                 FileName = link.NavigateUri.AbsoluteUri
             });
         }
+
+        private void SsoQr_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new SsoQrDialog();
+            dialog.ShowDialog();
+            var validSsoInfo = dialog.ValidSsoInfo;
+            if (validSsoInfo != null)
+            {
+                TokenTextBox.Text = dialog.Token;
+                MessageBox.Show($"欢迎您，{validSsoInfo.User.Name}（{validSsoInfo.User.AuthorTypeText}）", "登录成功");
+            }
+        }
     }
 }

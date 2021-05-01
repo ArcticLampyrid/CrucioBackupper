@@ -226,6 +226,27 @@ namespace CrucioNetwork
             return await ApiGet<ApiResult<UserStoryDetail>>($"/v6/profile/{uuid}/stories" + (string.IsNullOrEmpty(cursor) ? "" : $"?cursor={cursor}"));
         }
 
+        public async Task<ApiResult<SsoQrInfo>> RequireSsoQrInfo()
+        {
+            var body = await client.GetStringAsync("https://editor.kuaidianyuedu.com/api/v1/sso/qr_info");
+            return JsonSerializer.Deserialize<ApiResult<SsoQrInfo>>(body, serializerOptions);
+        }
+
+        public async Task<(ApiResult<ValidSsoInfo>, string)> ValidSsoQrInfo(SsoQrInfo qrInfo)
+        {
+            var param = $"{{\"token\":\"{qrInfo.Token}\"}}";
+            var content = new StringContent(param, Encoding.UTF8, "application/json");
+            using (var response = await client.PostAsync("https://editor.kuaidianyuedu.com/api/v1/sso/loop_valid", content))
+            {
+                var result = JsonSerializer.Deserialize<ApiResult<ValidSsoInfo>>(await response.Content.ReadAsStringAsync(), serializerOptions);
+                if (!result.HasError)
+                {
+                    return (result, cookieContainer.GetCookies(new Uri("https://editor.kuaidianyuedu.com/"))["p"].Value);
+                }
+                return (result, null);
+            }
+        }
+
         public static string GetImageUrl(string uuid)
         {
             return $"https://{ImageDomain}/{uuid}?x-oss-process=image/format,webp";
