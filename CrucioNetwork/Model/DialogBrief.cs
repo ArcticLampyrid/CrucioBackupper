@@ -7,16 +7,25 @@ namespace CrucioNetwork.Model
 {
     public class DialogBrief
     {
+        /// <summary>
+        /// Use <c>double</c> since the server will send something like <c>123.0</c>.
+        /// </summary>
         [JsonPropertyName("audio_comment_count")]
-        public int AudioCommentCount { get; set; }
+        public double AudioCommentCount { get; set; }
         [JsonPropertyName("character_uuid")]
         public string CharacterUuid { get; set; }
+        /// <summary>
+        /// Use <c>double</c> since the server will send something like <c>123.0</c>.
+        /// </summary>
         [JsonPropertyName("comment_count")]
-        public int CommentCount { get; set; }
+        public double CommentCount { get; set; }
         [JsonPropertyName("index")]
         public int Index { get; set; }
+        /// <summary>
+        /// Use <c>double</c> since the server will send something like <c>123.0</c>.
+        /// </summary>
         [JsonPropertyName("like_count")]
-        public int LikeCount { get; set; }
+        public double LikeCount { get; set; }
         [JsonPropertyName("liked")]
         public bool Liked { get; set; }
         [JsonPropertyName("show_comment_icon")]
@@ -25,8 +34,11 @@ namespace CrucioNetwork.Model
         public string StoryUuid { get; set; }
         [JsonPropertyName("uuid")]
         public string Uuid { get; set; }
+        /// <summary>
+        /// Use <c>double</c> since the server will send something like <c>123.0</c>.
+        /// </summary>
         [JsonPropertyName("video_comment_count")]
-        public int VideoCommentCount { get; set; }
+        public double VideoCommentCount { get; set; }
 
         [JsonPropertyName("type")]
         public string Type { get; set; }
