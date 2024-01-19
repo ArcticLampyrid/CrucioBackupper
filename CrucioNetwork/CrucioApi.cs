@@ -19,7 +19,7 @@ namespace CrucioNetwork
         public static CrucioApi Default { get; } = new CrucioApi();
 
         private const string ApiDomain = "api.crucio.hecdn.com";
-        private const string ImageDomain = "qc.i.hecdn.com";
+        private const string ImageDomain = "ve.i.hecdn.com";
         private const string EmptyContentSHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
         private static readonly byte[] NormalSignKey = Encoding.UTF8.GetBytes("0e666341456764fcb3184767adcf2884");
         private static readonly byte[] ApiSignKey = Encoding.UTF8.GetBytes("ae2ce93f486b638849f6f438c3b38d3a");
