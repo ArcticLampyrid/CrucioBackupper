@@ -12,9 +12,10 @@
                 <ResourceDictionary Source="/Icons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <local:BorderClipConverter x:Key="BorderClipConverter" />
+            <local:ImageCacheOnLoadConverter x:Key="ImageCacheOnLoadConverter" />
             <DataTemplate x:Key="LeftChatMessageTemplate">
                 <DockPanel HorizontalAlignment="Left" Margin="5">
-                    <Image Source="{Binding AvatarPath}" RenderOptions.BitmapScalingMode="HighQuality" Width="36" Height="36" DockPanel.Dock="Left" VerticalAlignment="Top" Margin="0,0,2,0">
+                    <Image Source="{Binding AvatarPath, Converter={StaticResource ImageCacheOnLoadConverter}}" RenderOptions.BitmapScalingMode="HighQuality" Width="36" Height="36" DockPanel.Dock="Left" VerticalAlignment="Top" Margin="0,0,2,0">
                         <Image.Clip>
                             <EllipseGeometry RadiusX="18" RadiusY="18" Center="18,18"/>
                         </Image.Clip>
@@ -39,7 +40,7 @@
             </DataTemplate>
             <DataTemplate x:Key="RightChatMessageTemplate">
                 <DockPanel HorizontalAlignment="Right" Margin="5">
-                    <Image Source="{Binding AvatarPath}" RenderOptions.BitmapScalingMode="HighQuality" Width="36" Height="36" DockPanel.Dock="Right" VerticalAlignment="Top" Margin="2,0,0,0">
+                    <Image Source="{Binding AvatarPath, Converter={StaticResource ImageCacheOnLoadConverter}}" RenderOptions.BitmapScalingMode="HighQuality" Width="36" Height="36" DockPanel.Dock="Right" VerticalAlignment="Top" Margin="2,0,0,0">
                         <Image.Clip>
                             <EllipseGeometry RadiusX="18" RadiusY="18" Center="18,18"/>
                         </Image.Clip>
@@ -84,7 +85,7 @@
                 </TextBox>
             </DataTemplate>
             <DataTemplate x:Key="ImageMessageContentTemplate">
-                <Image Source="{Binding}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality">
+                <Image Source="{Binding Converter={StaticResource ImageCacheOnLoadConverter}}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality">
                     <Image.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="导出图片" Click="SaveImageMessageMenu_Click"/>
@@ -108,7 +109,7 @@
             <DataTemplate x:Key="VideoMessageContentTemplate">
                 <Button BorderThickness="0" Padding="5" Click="PlayVideoButton_Click">
                     <Grid>
-                        <Image Source="{Binding CoverPath}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image Source="{Binding CoverPath, Converter={StaticResource ImageCacheOnLoadConverter}}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Border Background="#7F0A0A0A" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
                             <Grid>
                                 <Label Content="视频" Panel.ZIndex="1" HorizontalAlignment="Left" Foreground="White"/>
@@ -138,7 +139,7 @@
             </TabControl.ItemContainerStyle>
             <TabItem Header="简介" Name="IntroductionTabItem">
                 <StackPanel Orientation="Vertical">
-                    <Image Source="{Binding CoverUrl}" />
+                    <Image Source="{Binding CoverUrl, Converter={StaticResource ImageCacheOnLoadConverter}}" />
                     <Label Content="{Binding Name}" FontWeight="Bold" />
                     <Label HorizontalAlignment="Right">
                         <TextBlock Text="{Binding StoryCount, StringFormat=共\{0\}话}"/>
