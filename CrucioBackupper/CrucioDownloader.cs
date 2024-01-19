@@ -51,26 +51,75 @@ namespace CrucioBackupper
             await JsonSerializer.SerializeAsync(stream, model, serializerOptions);
         }
 
-        private async Task DownloadResource(string type, string uuid, string ext, string url)
+        private struct ResourceInfo
         {
-            using var targetStream = target.CreateEntry($"{type}/{uuid}.{ext}", CompressionLevel.NoCompression).Open();
-            using var networkStream = await api.HttpRequest(new HttpRequestMessage(HttpMethod.Get, url));
-            await networkStream.CopyToAsync(targetStream);
+            public string Type { get; }
+            public string Uuid { get; }
+            public string Ext { get; }
+            public string Url { get; }
+
+            public ResourceInfo(string type, string uuid, string ext, string url)
+            {
+                Type = type ?? throw new ArgumentNullException(nameof(type));
+                Uuid = uuid ?? throw new ArgumentNullException(nameof(uuid));
+                Ext = ext ?? throw new ArgumentNullException(nameof(ext));
+                Url = url ?? throw new ArgumentNullException(nameof(url));
+            }
+        }
+
+        private async Task CopyResourceToMemoryStream(ResourceInfo resource, MemoryStream memoryStream)
+        {
+            memoryStream.SetLength(0);
+            using var networkStream = await api.HttpRequest(new HttpRequestMessage(HttpMethod.Get, resource.Url));
+            await networkStream.CopyToAsync(memoryStream);
         }
 
         private async Task DownloadResource()
         {
-            var tasks = ImageSet.Select(x => DownloadResource("Image", x, "webp", CrucioApi.GetImageUrl(x)))
-                .Concat(AudioMap.Select(x => DownloadResource("Audio", x.Key, "m4a", x.Value)))
-                .Concat(VideoMap.Select(x => DownloadResource("Video", x.Key, "mp4", x.Value)));
-            foreach (var item in tasks)
+            var resources = ImageSet.Select(x => new ResourceInfo("Image", x, "webp", CrucioApi.GetImageUrl(x)))
+                .Concat(AudioMap.Select(x => new ResourceInfo("Audio", x.Key, "m4a", x.Value)))
+                .Concat(VideoMap.Select(x => new ResourceInfo("Video", x.Key, "mp4", x.Value)))
+                .ToList();
+
+            const int maxParallel = 10;
+            var cacheStream = new MemoryStream[maxParallel];
+            var tasks = new Task[maxParallel];
+            for (int i = 0; i < maxParallel; i++)
             {
-                try
+                cacheStream[i] = new MemoryStream();
+            }
+            try
+            {
+                for (int i = 0; i < resources.Count(); i += maxParallel)
                 {
-                    await item;
+                    int maxTask = Math.Min(maxParallel, resources.Count() - i);
+                    for (int j = 0; j < maxTask; j++)
+                    {
+                        tasks[j] = CopyResourceToMemoryStream(resources[i + j], cacheStream[j]);
+                    }
+                    for (int j = 0; j < maxTask; j++)
+                    {
+                        try
+                        {
+                            await tasks[j];
+                        }
+                        catch (Exception e)
+                        {
+                            Trace.TraceError($"Failed to download resource {resources[i + j].Uuid}: {e}");
+                        }
+                        tasks[j] = null;
+                        var resource = resources[i + j];
+                        using var targetStream = target.CreateEntry($"{resource.Type}/{resource.Uuid}.{resource.Ext}").Open();
+                        cacheStream[j].Seek(0, SeekOrigin.Begin);
+                        await cacheStream[j].CopyToAsync(targetStream);
+                    }
                 }
-                catch (Exception)
+            }
+            finally
+            {
+                for (int j = 0; j < maxParallel; j++)
                 {
+                    cacheStream[j].Dispose();
                 }
             }
         }
