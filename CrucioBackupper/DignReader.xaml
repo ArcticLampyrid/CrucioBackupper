@@ -139,7 +139,13 @@
             </TabControl.ItemContainerStyle>
             <TabItem Header="简介" Name="IntroductionTabItem">
                 <StackPanel Orientation="Vertical">
-                    <Image Source="{Binding CoverUrl, Converter={StaticResource ImageCacheOnLoadConverter}}" />
+                    <Image Source="{Binding CoverUrl, Converter={StaticResource ImageCacheOnLoadConverter}}">
+                        <Image.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="导出封面" Click="SaveCoverMenu_Click"/>
+                            </ContextMenu>
+                        </Image.ContextMenu>
+                    </Image>
                     <Label Content="{Binding Name}" FontWeight="Bold" />
                     <Label HorizontalAlignment="Right">
                         <TextBlock Text="{Binding StoryCount, StringFormat=共\{0\}话}"/>

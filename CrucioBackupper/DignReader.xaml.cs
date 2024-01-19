@@ -250,5 +250,20 @@ namespace CrucioBackupper
                 File.Copy(path, dialog.FileName);
             }
         }
+
+        private void SaveCoverMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var dataContext = (sender as FrameworkElement).DataContext as BasicCollectionViewModel;
+            var path = dataContext.CoverUrl;
+            var dialog = new SaveFileDialog()
+            {
+                Filter = "WebP图像文件(*.webp)|*.webp",
+                FileName = Path.GetFileName(path)
+            };
+            if (dialog.ShowDialog().GetValueOrDefault(false))
+            {
+                File.Copy(path, dialog.FileName);
+            }
+        }
     }
 }
