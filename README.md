@@ -5,5 +5,5 @@
 用于想要退出快点的作家备份自己的文章  
 
 # 软件截图
-![Screenshot 1](https://github.com/1354092549/CrucioBackupper/blob/master/Screenshot/1.png)   
-![Screenshot 2](https://github.com/1354092549/CrucioBackupper/blob/master/Screenshot/2.png)   
+![Screenshot 1](https://raw.githubusercontent.com/ArcticLampyrid/CrucioBackupper/main/Screenshot/1.png)   
+![Screenshot 2](https://raw.githubusercontent.com/ArcticLampyrid/CrucioBackupper/main/Screenshot/2.png)   

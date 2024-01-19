@@ -23,12 +23,12 @@ namespace CrucioBackupper
         private readonly string collectionUuid;
         private readonly ZipArchive target;
 
-        private HashSet<string> ImageSet = new HashSet<string>();
-        private Dictionary<string, string> AudioMap = new Dictionary<string, string>();
-        private Dictionary<string, string> VideoMap = new Dictionary<string, string>();
-        private static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
+        private readonly HashSet<string> ImageSet = [];
+        private readonly Dictionary<string, string> AudioMap = [];
+        private readonly Dictionary<string, string> VideoMap = [];
+        private static readonly JsonSerializerOptions serializerOptions = new()
         {
-            IgnoreNullValues = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = true
         };
 

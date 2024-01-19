@@ -14,6 +14,7 @@ using CrucioBackupper.Model;
 using CrucioBackupper.ViewModel;
 using Microsoft.Win32;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CrucioBackupper
 {
@@ -22,30 +23,29 @@ namespace CrucioBackupper
     /// </summary>
     public partial class DignReader : Window
     {
-        private string resourceDirectory;
-        private CollectionModel collectionModel;
+        private readonly string resourceDirectory;
+        private readonly CollectionModel collectionModel;
 
-        private DataTemplate leftChatMessageTemplate;
-        private DataTemplate rightChatMessageTemplate;
-        private DataTemplate systemChatMessageTemplate;
-        private DataTemplate textMessageContentTemplate;
-        private DataTemplate imageMessageContentTemplate;
-        private DataTemplate audioMessageContentTemplate;
-        private DataTemplate videoMessageContentTemplate;
+        private readonly DataTemplate leftChatMessageTemplate;
+        private readonly DataTemplate rightChatMessageTemplate;
+        private readonly DataTemplate systemChatMessageTemplate;
+        private readonly DataTemplate textMessageContentTemplate;
+        private readonly DataTemplate imageMessageContentTemplate;
+        private readonly DataTemplate audioMessageContentTemplate;
+        private readonly DataTemplate videoMessageContentTemplate;
         private readonly ZipArchive archive;
-        private readonly HashSet<string> extractedFiles = new HashSet<string>();
-        private static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
+        private readonly HashSet<string> extractedFiles = [];
+        private static readonly JsonSerializerOptions serializerOptions = new()
         {
-            IgnoreNullValues = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = true
         };
 
         public string GetContentFilePath(string relativePath)
         {
             var result = Path.GetFullPath(Path.Combine(resourceDirectory, relativePath));
-            if (!extractedFiles.Contains(relativePath))
+            if (extractedFiles.Add(relativePath))
             {
-                extractedFiles.Add(relativePath);
                 Directory.CreateDirectory(Path.GetDirectoryName(result));
                 archive.GetEntry(relativePath)?.ExtractToFile(result, true);
             }
