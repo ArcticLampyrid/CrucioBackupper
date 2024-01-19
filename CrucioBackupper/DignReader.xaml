@@ -20,7 +20,7 @@
                         </Image.Clip>
                         <Image.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="导出" Click="SaveAvatarMenu_Click"/>
+                                <MenuItem Header="导出头像" Click="SaveAvatarMenu_Click"/>
                             </ContextMenu>
                         </Image.ContextMenu>
                     </Image>
@@ -45,7 +45,7 @@
                         </Image.Clip>
                         <Image.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="导出" Click="SaveAvatarMenu_Click"/>
+                                <MenuItem Header="导出头像" Click="SaveAvatarMenu_Click"/>
                             </ContextMenu>
                         </Image.ContextMenu>
                     </Image>
@@ -87,7 +87,7 @@
                 <Image Source="{Binding}" MaxWidth="256" RenderOptions.BitmapScalingMode="HighQuality">
                     <Image.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="导出" Click="SaveImageMessageMenu_Click"/>
+                            <MenuItem Header="导出图片" Click="SaveImageMessageMenu_Click"/>
                         </ContextMenu>
                     </Image.ContextMenu>
                 </Image>
@@ -100,7 +100,7 @@
                     </StackPanel>
                     <Button.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="导出" Click="SaveAudioMessageMenu_Click"/>
+                            <MenuItem Header="导出音频" Click="SaveAudioMessageMenu_Click"/>
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>
@@ -118,7 +118,7 @@
                     </Grid>
                     <Button.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="导出" Click="SaveVideoMessageMenu_Click"/>
+                            <MenuItem Header="导出视频" Click="SaveVideoMessageMenu_Click"/>
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>
