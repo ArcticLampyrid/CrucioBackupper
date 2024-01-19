@@ -15,6 +15,7 @@ using CrucioBackupper.ViewModel;
 using Microsoft.Win32;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Diagnostics;
 
 namespace CrucioBackupper
 {
@@ -97,8 +98,9 @@ namespace CrucioBackupper
                 archive.Dispose();
                 Directory.Delete(resourceDirectory, true);
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                Trace.TraceError($"Failed to delete resource directory \"{resourceDirectory}\": {exception}");
             }
         }
 
