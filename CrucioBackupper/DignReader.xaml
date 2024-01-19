@@ -160,6 +160,11 @@
                 <ListView Name="CatalogListView" SelectionChanged="CatalogListView_SelectionChanged" BorderThickness="0" DisplayMemberPath="DisplayName" />
 
             </TabItem>
+            <TabItem Header="导出">
+                <StackPanel Orientation="Vertical">
+                    <Button Content="导出 TXT" Click="ExportAsTXT_Click"/>
+                </StackPanel>
+            </TabItem>
         </TabControl>
         <DockPanel DockPanel.Dock="Top">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">

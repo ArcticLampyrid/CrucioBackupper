@@ -265,5 +265,32 @@ namespace CrucioBackupper
                 File.Copy(path, dialog.FileName);
             }
         }
+
+        private async void ExportAsTXT_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("请注意，TXT 格式无法保留对话体的完整结构信息，可能会造成信息丢失，亦不可用于导入得到 dign 格式。"
+                + Environment.NewLine
+                + "是否继续？", "导出", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            var collectionViewModel = IntroductionTabItem.DataContext as BasicCollectionViewModel;
+            var dialog = new SaveFileDialog()
+            {
+                Filter = "ZIP压缩文件(*.zip)|*.zip",
+                FileName = collectionViewModel.Name + ".zip"
+            };
+            if (dialog.ShowDialog().GetValueOrDefault(false))
+            {
+                if (File.Exists(dialog.FileName))
+                {
+                    File.Delete(dialog.FileName);
+                }
+                using var txtPack = ZipFile.Open(dialog.FileName, ZipArchiveMode.Create);
+                await new TextFileExporter(txtPack, archive).Export();
+                MessageBox.Show("导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
     }
 }
