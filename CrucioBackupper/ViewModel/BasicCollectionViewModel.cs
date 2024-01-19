@@ -11,6 +11,11 @@ namespace CrucioBackupper.ViewModel
         public int StoryCount { get; set; }
         public string Desc { get; set; }
         public string CoverUuid { get; set; }
-        public string CoverUrl => CrucioApi.GetImageUrl(CoverUuid);
+        private string _coverUrl;
+        public string CoverUrl => _coverUrl ?? CrucioApi.GetImageUrl(CoverUuid);
+        public void UseCustomCoverUrl(string coverUrl)
+        {
+            _coverUrl = coverUrl;
+        }
     }
 }

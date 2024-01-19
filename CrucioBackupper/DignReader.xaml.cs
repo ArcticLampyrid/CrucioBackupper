@@ -79,13 +79,15 @@ namespace CrucioBackupper
                 CatalogListView.SelectedIndex = 0;
             }
 
-            IntroductionTabItem.DataContext = new BasicCollectionViewModel()
+            var collectionViewModel = new BasicCollectionViewModel()
             {
                 CoverUuid = collectionModel.CoverUuid,
                 Desc = collectionModel.Desc,
                 Name = collectionModel.Name,
                 StoryCount = collectionModel.StoryCount
             };
+            collectionViewModel.UseCustomCoverUrl(GetContentFilePath($"Image/{collectionModel.CoverUuid}.webp"));
+            IntroductionTabItem.DataContext = collectionViewModel;
         }
 
         private void Window_Closed(object sender, EventArgs e)
