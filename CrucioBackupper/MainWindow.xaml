@@ -147,6 +147,9 @@
                                     <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
                                         <TextBlock Text="{Binding LikeCountDesc, StringFormat=点赞量：\{0\}}" />
                                     </Border>
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock Text="{Binding Author, StringFormat=作者：\{0\}}" />
+                                    </Border>
                                 </StackPanel>
                                 <Label Content="{Binding Desc}" />
                             </StackPanel>

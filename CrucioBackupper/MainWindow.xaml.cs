@@ -46,6 +46,7 @@ namespace CrucioBackupper
             var source = new List<CollectionViewModel>();
             var collectionMap = result.Data.Collections.ToDictionary(x => x.Uuid);
             var storyMap = result.Data.Stories.ToDictionary(x => x.Uuid);
+            var userMap = result.Data.Users?.ToDictionary(x => x.Uuid) ?? [];
             foreach (var uuid in result.Data.SearchStoryUuids.List)
             {
                 var story = storyMap[uuid];
@@ -62,6 +63,14 @@ namespace CrucioBackupper
                     CoverUuid = story.CoverUuid,
                     IsVideo = story.IsVideoType
                 };
+                if (userMap.TryGetValue(story.AuthorUuid, out var author))
+                {
+                    viewModel.Author = author.Name;
+                }
+                if (string.IsNullOrEmpty(viewModel.Author))
+                {
+                    viewModel.Author = "未知";
+                }
                 source.Add(viewModel);
             }
             SearchResultListView.ItemsSource = source;
@@ -75,9 +84,21 @@ namespace CrucioBackupper
                 MessageBox.Show("请先选定需要下载的目标");
                 return;
             }
+
+            var fileName = string.Empty;
+            if (SearchResultListView.ItemsSource is List<CollectionViewModel> viewModel)
+            {
+                var item = viewModel.FirstOrDefault(x => x.Uuid == collectionUuid);
+                if (item != null)
+                {
+                    fileName = $"{item.Name} by {item.Author}.dign";
+                }
+            }
+
             var dialog = new SaveFileDialog()
             {
-                Filter = "Dialogue Novel文件(*.dign)|*.dign"
+                Filter = "Dialogue Novel文件(*.dign)|*.dign",
+                FileName = fileName
             };
             if (!dialog.ShowDialog().GetValueOrDefault(false))
             {
@@ -100,7 +121,7 @@ namespace CrucioBackupper
             {
                 Log.Error(exception, "下载对话小说 {Uuid} 失败", collectionUuid);
             }
-            finally 
+            finally
             {
                 DownloadButton.IsEnabled = true;
             }
@@ -146,7 +167,7 @@ namespace CrucioBackupper
             Hyperlink link = sender as Hyperlink;
             Process.Start(new ProcessStartInfo()
             {
-                UseShellExecute = true, 
+                UseShellExecute = true,
                 FileName = link.NavigateUri.AbsoluteUri
             });
         }

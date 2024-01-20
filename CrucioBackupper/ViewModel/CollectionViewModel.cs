@@ -16,6 +16,7 @@ namespace CrucioBackupper.ViewModel
         public string LikeCountDesc => GetNumberDesc(LikeCount);
         public bool IsVideo { get; set; } = false;
         public string ShareUuid { get; set; }
+        public string Author { get; set; }
 
         private static string GetNumberDesc(long x) => x switch
         {
