@@ -81,7 +81,7 @@ namespace CrucioBackupper
             var collectionUuid = CollectionUuidTextBox.Text;
             if (string.IsNullOrWhiteSpace(collectionUuid))
             {
-                MessageBox.Show("请先选定需要下载的目标");
+                MessageBox.Show(this, "请先选定需要下载的目标");
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace CrucioBackupper
             };
             if (!dialog.ShowDialog().GetValueOrDefault(false))
             {
-                MessageBox.Show("操作取消");
+                MessageBox.Show(this, "操作取消");
                 return;
             }
             var path = dialog.FileName;
@@ -125,7 +125,7 @@ namespace CrucioBackupper
             {
                 DownloadButton.IsEnabled = true;
             }
-            MessageBox.Show("下载完成，下载的Dialogue Novel文件(*.dign)可用本软件的 查看备份 功能查阅。");
+            MessageBox.Show(this, "下载完成，下载的Dialogue Novel文件(*.dign)可用本软件的 查看备份 功能查阅。");
         }
 
         private void ReadBackupButton_Click(object sender, RoutedEventArgs e)
@@ -136,7 +136,7 @@ namespace CrucioBackupper
             };
             if (!dialog.ShowDialog().GetValueOrDefault(false))
             {
-                MessageBox.Show("操作取消");
+                MessageBox.Show(this, "操作取消");
                 return;
             }
             new DignReader(dialog.FileName).Show();
@@ -144,7 +144,7 @@ namespace CrucioBackupper
 
         private void FixImageProblem_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("图片显示异常可能是由于您的电脑缺少WebP解码器，点击 确定 将开始安装解码器");
+            MessageBox.Show(this, "图片显示异常可能是由于您的电脑缺少WebP解码器，点击 确定 将开始安装解码器");
             try
             {
                 var coderInstaller = System.IO.Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "WebpCodecSetup.exe");
@@ -158,7 +158,7 @@ namespace CrucioBackupper
             }
             catch (Exception exception)
             {
-                MessageBox.Show($"启动安装程序失败：{exception}");
+                MessageBox.Show(this, $"启动安装程序失败：{exception}");
             }
         }
 
@@ -180,7 +180,7 @@ namespace CrucioBackupper
             if (validSsoInfo != null)
             {
                 TokenTextBox.Text = dialog.Token;
-                MessageBox.Show($"欢迎您，{validSsoInfo.User.Name}（{validSsoInfo.User.AuthorTypeText}）", "登录成功");
+                MessageBox.Show(this, $"欢迎您，{validSsoInfo.User.Name}（{validSsoInfo.User.AuthorTypeText}）", "登录成功");
             }
         }
     }

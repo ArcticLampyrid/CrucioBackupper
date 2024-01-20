@@ -279,7 +279,7 @@ namespace CrucioBackupper
 
         private async void ExportAsTXT_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("请注意，TXT 格式无法保留对话体的完整结构信息，可能会造成信息丢失，亦不可用于导入得到 dign 格式。"
+            if (MessageBox.Show(this, "请注意，TXT 格式无法保留对话体的完整结构信息，可能会造成信息丢失，亦不可用于导入得到 dign 格式。"
                 + Environment.NewLine
                 + "是否继续？", "导出", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
             {
@@ -300,13 +300,13 @@ namespace CrucioBackupper
                 }
                 using var txtPack = ZipFile.Open(dialog.FileName, ZipArchiveMode.Create);
                 await new TextFileExporter(txtPack, archive).Export();
-                MessageBox.Show("导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(this, "导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
         private async void ExportAsPNG_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("请注意，PNG 格式无法逆向转换为文本格式或 *.dign 格式。"
+            if (MessageBox.Show(this, "请注意，PNG 格式无法逆向转换为文本格式或 *.dign 格式。"
                 + Environment.NewLine
                 + "是否继续？", "导出", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
             {
@@ -390,7 +390,7 @@ namespace CrucioBackupper
                 ExportAsPNG.IsEnabled = true;
                 ExportProgressArea.Visibility = Visibility.Hidden;
             }
-            MessageBox.Show("导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, "导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
