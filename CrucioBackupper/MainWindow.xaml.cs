@@ -18,6 +18,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Serilog;
+using SerilogViewer;
 
 namespace CrucioBackupper
 {
@@ -30,6 +32,12 @@ namespace CrucioBackupper
         public MainWindow()
         {
             InitializeComponent();
+            var log = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo.SerilogViewerSink(LogViewer)
+                .CreateLogger();
+            Log.Logger = log;
+            Log.Information("CrucioBackupper 已启动");
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -87,6 +95,10 @@ namespace CrucioBackupper
                 api.SetToken(TokenTextBox.Text);
                 using var target = ZipFile.Open(path, ZipArchiveMode.Create);
                 await new CrucioDownloader(api, collectionUuid, target).Download();
+            }
+            catch (Exception exception)
+            {
+                Log.Error(exception, "下载对话小说 {Uuid} 失败", collectionUuid);
             }
             finally 
             {

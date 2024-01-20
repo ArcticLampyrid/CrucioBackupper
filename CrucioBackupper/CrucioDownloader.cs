@@ -14,11 +14,13 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace CrucioBackupper
 {
     class CrucioDownloader
     {
+        private readonly ILogger logger = Log.ForContext<CrucioDownloader>();
         private readonly CrucioApi api;
         private readonly string collectionUuid;
         private readonly ZipArchive target;
@@ -90,22 +92,27 @@ namespace CrucioBackupper
             }
             try
             {
-                for (int i = 0; i < resources.Count(); i += maxParallel)
+                for (int i = 0; i < resources.Count; i += maxParallel)
                 {
-                    int maxTask = Math.Min(maxParallel, resources.Count() - i);
+                    int maxTask = Math.Min(maxParallel, resources.Count - i);
                     for (int j = 0; j < maxTask; j++)
                     {
                         tasks[j] = CopyResourceToMemoryStream(resources[i + j], cacheStream[j]);
                     }
                     for (int j = 0; j < maxTask; j++)
                     {
+                        if ((i + j) % Math.Max(resources.Count / 5, 1) == 0)
+                        {
+                            logger.Information("正在下载资源 {Start} / {Total}", i + 1, resources.Count);
+                        }
                         try
                         {
                             await tasks[j];
                         }
                         catch (Exception e)
                         {
-                            Trace.TraceError($"Failed to download resource {resources[i + j].Uuid}: {e}");
+                            logger.Error(e, "无法下载资源 {Type}/{Uuid}", resources[i + j].Type, resources[i + j].Uuid);
+                            continue;
                         }
                         tasks[j] = null;
                         var resource = resources[i + j];
@@ -137,10 +144,7 @@ namespace CrucioBackupper
             for (int i = 0; i < stories.Count; i++)
             {
                 StoryBrief storyBrief = stories[i];
-                if (coverUuid == null)
-                {
-                    coverUuid = storyBrief.CoverUuid;
-                }
+                coverUuid ??= storyBrief.CoverUuid;
                 try
                 {
                     var storyDetail = await storiesDetail[i];
@@ -160,12 +164,13 @@ namespace CrucioBackupper
                     {
                         ImageSet.Add(x.AvatarUuid);
                     }
-                    var storyModel = new StoryModel() 
-                    { 
+                    var storyModel = new StoryModel()
+                    {
                         Seq = storyBrief.Index + 1,
                         Title = storyBrief.Title,
-                        Dialogs = dialogInfo.Data.Dialogs.Select(x => {
-                            var result = new DialogModel() 
+                        Dialogs = dialogInfo.Data.Dialogs.Select(x =>
+                        {
+                            var result = new DialogModel()
                             {
                                 Type = x.Type,
                                 Text = x.Text,
@@ -184,7 +189,7 @@ namespace CrucioBackupper
                             if (x.Audio != null)
                             {
                                 var uuid = x.Audio.Uuid;
-                                if(string.IsNullOrEmpty(uuid))
+                                if (string.IsNullOrEmpty(uuid))
                                 {
                                     uuid = new Uri(x.Audio.Url).AbsolutePath.Substring(1);
                                 }
@@ -207,7 +212,7 @@ namespace CrucioBackupper
                                     Uuid = uuid
                                 };
                                 VideoMap.TryAdd(uuid, x.Video.GetVideoPlayUrl());
-                                if(!string.IsNullOrEmpty(x.Video.CoverImageUuid))
+                                if (!string.IsNullOrEmpty(x.Video.CoverImageUuid))
                                 {
                                     ImageSet.Add(x.Video.CoverImageUuid);
                                 }
@@ -216,11 +221,12 @@ namespace CrucioBackupper
                         }).ToList()
                     };
                     await WriteStory(storyModel);
+                    logger.Information("下载章节 #{Seq}({Uuid}) 成功", storyBrief.Index + 1, storyBrief.Uuid);
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceError($"Failed to download story #{storyBrief.Index}({storyBrief.Uuid}): {e}");
-                    throw;
+                    logger.Error(e, "无法下载章节 #{Seq}({Uuid})", storyBrief.Index + 1, storyBrief.Uuid);
+                    continue;
                 }
             }
             var collectionModel = new CollectionModel()

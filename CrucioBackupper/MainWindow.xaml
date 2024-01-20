@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CrucioBackupper"
+        xmlns:serilogviewer="clr-namespace:SerilogViewer;assembly=SerilogViewer"
         xmlns:vm="clr-namespace:CrucioBackupper.ViewModel"
         mc:Ignorable="d"
         Title="快点阅读文章备份器" Height="500" Width="800">
@@ -108,16 +109,21 @@
                 <Button Margin="5,0,0,0" x:Name="ReadBackupButton" Click="ReadBackupButton_Click">查看备份</Button>
             </StackPanel>
         </Grid>
-        <ListView x:Name="SearchResultListView" SelectedValuePath="Uuid">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding CoverUrl}" Width="100" Height="132" VerticalAlignment="Top"/>
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center"/>
-                                <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
-                                    <TextBlock>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <ListView Grid.Row="0" x:Name="SearchResultListView" SelectedValuePath="Uuid">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding CoverUrl}" Width="100" Height="132" VerticalAlignment="Top"/>
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock>
                                         <Run>
                                             <Run.Style>
                                                 <Style TargetType="Run">
@@ -133,20 +139,22 @@
                                             </Run.Style>
                                         </Run>
                                         <Run><Binding Path="ShareUuid" /></Run>
-                                    </TextBlock>
-                                </Border>
-                                <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
-                                    <TextBlock Text="{Binding ClickCountDesc, StringFormat=点击数：\{0\}}" />
-                                </Border>
-                                <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
-                                    <TextBlock Text="{Binding LikeCountDesc, StringFormat=点赞量：\{0\}}" />
-                                </Border>
+                                        </TextBlock>
+                                    </Border>
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock Text="{Binding ClickCountDesc, StringFormat=点击数：\{0\}}" />
+                                    </Border>
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock Text="{Binding LikeCountDesc, StringFormat=点赞量：\{0\}}" />
+                                    </Border>
+                                </StackPanel>
+                                <Label Content="{Binding Desc}" />
                             </StackPanel>
-                            <Label Content="{Binding Desc}" />
                         </StackPanel>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <serilogviewer:SerilogViewer Grid.Row="1" x:Name="LogViewer" TimeWidth="120" ContextWidth="130" LevelWidth="80" MessageWidth="290" ExceptionWidth="140" />
+        </Grid>
     </DockPanel>
 </Window>
