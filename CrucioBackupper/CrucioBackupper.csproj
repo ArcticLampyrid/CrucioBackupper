@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
     <Version>1.2.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
