@@ -104,16 +104,9 @@ namespace CrucioBackupper
             }
         }
 
-        private void CatalogListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void AddDialogsToUICollection(UIElementCollection collection, int seq)
         {
-            var selected = (CatalogListView.SelectedItem as BasicStoryModel);
-            
-            DialogStackPanel.Children.Clear();
-            if (selected == null)
-            {
-                return;
-            }
-            var storyModel = JsonSerializer.Deserialize<StoryModel>(File.ReadAllText(GetContentFilePath($"Story/{selected.Seq}.json"), Encoding.UTF8), serializerOptions);
+            var storyModel = JsonSerializer.Deserialize<StoryModel>(File.ReadAllText(GetContentFilePath($"Story/{seq}.json"), Encoding.UTF8), serializerOptions);
             foreach (var dialog in storyModel.Dialogs)
             {
                 FrameworkElement content;
@@ -160,8 +153,21 @@ namespace CrucioBackupper
                 };
                 var chatMessageControl = chatMessageTemplate.LoadContent() as FrameworkElement;
                 chatMessageControl.DataContext = chatMessageViewModel;
-                DialogStackPanel.Children.Add(chatMessageControl);
+                collection.Add(chatMessageControl);
             }
+        }
+
+
+        private void CatalogListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selected = (CatalogListView.SelectedItem as BasicStoryModel);
+
+            DialogStackPanel.Children.Clear();
+            if (selected == null)
+            {
+                return;
+            }
+            AddDialogsToUICollection(DialogStackPanel.Children, selected.Seq);
             DialogScrollViewer.ScrollToVerticalOffset(0);
         }
 
@@ -291,6 +297,89 @@ namespace CrucioBackupper
                 await new TextFileExporter(txtPack, archive).Export();
                 MessageBox.Show("导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private async void ExportAsPNG_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("请注意，PNG 格式无法逆向转换为文本格式或 *.dign 格式。"
+                + Environment.NewLine
+                + "是否继续？", "导出", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+            try
+            {
+                ExportAsPNG.IsEnabled = false;
+                var collectionViewModel = IntroductionTabItem.DataContext as BasicCollectionViewModel;
+                var dialog = new SaveFileDialog()
+                {
+                    Filter = "ZIP压缩文件(*.zip)|*.zip",
+                    FileName = collectionViewModel.Name + ".zip"
+                };
+                if (!dialog.ShowDialog().GetValueOrDefault(false))
+                {
+                    return;
+                }
+                if (File.Exists(dialog.FileName))
+                {
+                    File.Delete(dialog.FileName);
+                }
+                using var pngPack = ZipFile.Open(dialog.FileName, ZipArchiveMode.Create);
+                using var cacheStream = new MemoryStream();
+                for (int i = 0; i < collectionModel.StoryCount; i++)
+                {
+                    var panel = new StackPanel()
+                    {
+                        Orientation = Orientation.Vertical,
+                        Width = 240,
+                        Background = Brushes.White,
+                    };
+
+                    panel.Children.Add(new TextBlock()
+                    {
+                        Text = $"第 {i + 1} 话",
+                        FontSize = 24,
+                        FontWeight = FontWeights.Bold,
+                        Margin = new Thickness(0, 0, 0, 4),
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    });
+                    panel.Children.Add(new TextBlock()
+                    {
+                        Text = $"《{collectionModel.Name}》",
+                        FontSize = 12,
+                        Margin = new Thickness(0, 0, 0, 12),
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    });
+                    AddDialogsToUICollection(panel.Children, i + 1);
+                    panel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    panel.Arrange(new Rect(panel.DesiredSize));
+                    panel.UpdateLayout();
+                    panel.Dispatcher.Invoke(DispatcherPriority.ContextIdle, () => { });
+
+                    double dpi = 384;
+                    var bitmap = new RenderTargetBitmap(
+                        (int)Math.Ceiling(panel.ActualWidth * (dpi / 96)),
+                        (int)Math.Ceiling(panel.ActualHeight * (dpi / 96)),
+                        dpi,
+                        dpi,
+                        PixelFormats.Pbgra32);
+                    bitmap.Render(panel);
+
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                    cacheStream.SetLength(0);
+                    encoder.Save(cacheStream);
+
+                    using var targetStream = pngPack.CreateEntry($"{i + 1}.png").Open();
+                    cacheStream.Seek(0, SeekOrigin.Begin);
+                    await cacheStream.CopyToAsync(targetStream);
+                }
+            }
+            finally
+            {
+                ExportAsPNG.IsEnabled = true;
+            }
+            MessageBox.Show("导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }

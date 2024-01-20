@@ -162,7 +162,8 @@
             </TabItem>
             <TabItem Header="导出">
                 <StackPanel Orientation="Vertical">
-                    <Button Content="导出 TXT" Click="ExportAsTXT_Click"/>
+                    <Button Content="导出 TXT" Click="ExportAsTXT_Click" Margin="0 4 0 4"/>
+                    <Button Content="导出 PNG" Click="ExportAsPNG_Click" x:Name="ExportAsPNG" Margin="0 4 0 4"/>
                 </StackPanel>
             </TabItem>
         </TabControl>
