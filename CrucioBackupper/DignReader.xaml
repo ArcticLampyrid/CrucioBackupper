@@ -164,6 +164,12 @@
                 <StackPanel Orientation="Vertical">
                     <Button Content="导出 TXT" Click="ExportAsTXT_Click" Margin="0 4 0 4"/>
                     <Button Content="导出 PNG" Click="ExportAsPNG_Click" x:Name="ExportAsPNG" Margin="0 4 0 4"/>
+                    <StackPanel Orientation="Vertical" x:Name="ExportProgressArea" Visibility="Hidden">
+                        <Label>
+                            <TextBlock Text="{Binding Progress, StringFormat=当前进度：\{0:P0\}}"/>
+                        </Label>
+                        <ProgressBar Name="ExportProgressBar" Height="20" Minimum="0" Maximum="{Binding Total}" Value="{Binding Current, Mode=OneWay}"/>
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
         </TabControl>

@@ -16,6 +16,7 @@ using Microsoft.Win32;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Diagnostics;
+using System.Windows.Threading;
 
 namespace CrucioBackupper
 {
@@ -26,6 +27,7 @@ namespace CrucioBackupper
     {
         private readonly string resourceDirectory;
         private readonly CollectionModel collectionModel;
+        private readonly ProgressViewModel exportProgressModel;
 
         private readonly DataTemplate leftChatMessageTemplate;
         private readonly DataTemplate rightChatMessageTemplate;
@@ -89,6 +91,9 @@ namespace CrucioBackupper
             };
             collectionViewModel.UseCustomCoverUrl(GetContentFilePath($"Image/{collectionModel.CoverUuid}.webp"));
             IntroductionTabItem.DataContext = collectionViewModel;
+
+            exportProgressModel = new();
+            ExportProgressArea.DataContext = exportProgressModel;
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -310,6 +315,9 @@ namespace CrucioBackupper
             try
             {
                 ExportAsPNG.IsEnabled = false;
+                ExportProgressArea.Visibility = Visibility.Visible;
+                exportProgressModel.SetProgress(0, collectionModel.StoryCount);
+
                 var collectionViewModel = IntroductionTabItem.DataContext as BasicCollectionViewModel;
                 var dialog = new SaveFileDialog()
                 {
@@ -373,11 +381,14 @@ namespace CrucioBackupper
                     using var targetStream = pngPack.CreateEntry($"{i + 1}.png").Open();
                     cacheStream.Seek(0, SeekOrigin.Begin);
                     await cacheStream.CopyToAsync(targetStream);
+
+                    exportProgressModel.SetProgress(i + 1, collectionModel.StoryCount);
                 }
             }
             finally
             {
                 ExportAsPNG.IsEnabled = true;
+                ExportProgressArea.Visibility = Visibility.Hidden;
             }
             MessageBox.Show("导出完成", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
         }
