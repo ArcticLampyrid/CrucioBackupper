@@ -38,6 +38,26 @@ namespace CrucioBackupper
                 .CreateLogger();
             Log.Logger = log;
             Log.Information("CrucioBackupper 已启动");
+            Task.Run(async () =>
+            {
+                var checker = new GitHubUpdateChecker("ArcticLampyrid", "CrucioBackupper");
+                var htmlUrl = await checker.CheckForUpdatesAsync();
+                if (!string.IsNullOrEmpty(htmlUrl))
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        var result = MessageBox.Show(this, "发现新版本，是否打开下载页面？", "版本更新", MessageBoxButton.YesNo);
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            Process.Start(new ProcessStartInfo()
+                            {
+                                UseShellExecute = true,
+                                FileName = htmlUrl
+                            });
+                        }
+                    });
+                }
+            });
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
