@@ -7,7 +7,10 @@
         xmlns:serilogviewer="clr-namespace:SerilogViewer;assembly=SerilogViewer"
         xmlns:vm="clr-namespace:CrucioBackupper.ViewModel"
         mc:Ignorable="d"
-        Title="快点阅读文章备份器" Height="500" Width="800">
+        Title="快点阅读文章备份器" Height="500" Width="800"
+        AllowDrop="True"
+        DragOver="Window_DragOver"
+        Drop="Window_Drop">
     <DockPanel>
         <DockPanel DockPanel.Dock="Top">
             <Label DockPanel.Dock="Left" VerticalContentAlignment="Center">搜索内容：</Label>

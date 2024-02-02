@@ -212,5 +212,36 @@ namespace CrucioBackupper
                 MessageBox.Show(this, $"欢迎您，{validSsoInfo.User.Name}（{validSsoInfo.User.AuthorTypeText}）", "登录成功");
             }
         }
+
+        private void Window_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.None;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length == 1 && files[0].EndsWith(".dign", StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Effects = DragDropEffects.Link;
+                }
+            }
+            e.Handled = true;
+        }
+
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                try
+                {
+                    var dignReader = new DignReader(files[0]);
+                    dignReader.Show();
+                }
+                catch (Exception exception)
+                {
+                    Log.Error(exception, "打开对话小说文件失败");
+                }
+            }
+        }
     }
 }
