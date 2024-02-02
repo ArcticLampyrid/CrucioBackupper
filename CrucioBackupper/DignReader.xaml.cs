@@ -64,7 +64,12 @@ namespace CrucioBackupper
             } while (Directory.Exists(resourceDirectory));
             Directory.CreateDirectory(resourceDirectory);
 
-            collectionModel = JsonSerializer.Deserialize<CollectionModel>(File.ReadAllText(GetContentFilePath("Manifest.json"), Encoding.UTF8), serializerOptions);
+            var manifestFile = GetContentFilePath("Manifest.json");
+            if (!File.Exists(manifestFile))
+            {
+                throw new InvalidOperationException("Manifest.json not found");
+            }
+            collectionModel = JsonSerializer.Deserialize<CollectionModel>(File.ReadAllText(manifestFile, Encoding.UTF8), serializerOptions);
             InitializeComponent();
 
             leftChatMessageTemplate = this.FindResource("LeftChatMessageTemplate") as DataTemplate;

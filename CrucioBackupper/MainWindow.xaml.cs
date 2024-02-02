@@ -159,7 +159,16 @@ namespace CrucioBackupper
                 MessageBox.Show(this, "操作取消");
                 return;
             }
-            new DignReader(dialog.FileName).Show();
+            try
+            {
+                var dignReader = new DignReader(dialog.FileName);
+                dignReader.Show();
+            }
+            catch (Exception exception)
+            {
+                Log.Error(exception, "打开对话小说文件失败");
+                MessageBox.Show(this, $"打开对话小说文件失败：{exception}");
+            }
         }
 
         private void FixImageProblem_Click(object sender, RoutedEventArgs e)
