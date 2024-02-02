@@ -57,48 +57,56 @@ namespace CrucioBackupper
 
         public DignReader(string fileName)
         {
-            this.archive = ZipFile.OpenRead(fileName);
-            do
+            try
             {
-                resourceDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            } while (Directory.Exists(resourceDirectory));
-            Directory.CreateDirectory(resourceDirectory);
+                this.archive = ZipFile.OpenRead(fileName);
+                do
+                {
+                    resourceDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+                } while (Directory.Exists(resourceDirectory));
+                Directory.CreateDirectory(resourceDirectory);
 
-            var manifestFile = GetContentFilePath("Manifest.json");
-            if (!File.Exists(manifestFile))
-            {
-                throw new InvalidOperationException("Manifest.json not found");
+                var manifestFile = GetContentFilePath("Manifest.json");
+                if (!File.Exists(manifestFile))
+                {
+                    throw new InvalidOperationException("Manifest.json not found");
+                }
+                collectionModel = JsonSerializer.Deserialize<CollectionModel>(File.ReadAllText(manifestFile, Encoding.UTF8), serializerOptions);
+                InitializeComponent();
+
+                leftChatMessageTemplate = this.FindResource("LeftChatMessageTemplate") as DataTemplate;
+                rightChatMessageTemplate = this.FindResource("RightChatMessageTemplate") as DataTemplate;
+                systemChatMessageTemplate = this.FindResource("SystemChatMessageTemplate") as DataTemplate;
+                textMessageContentTemplate = this.FindResource("TextMessageContentTemplate") as DataTemplate;
+                imageMessageContentTemplate = this.FindResource("ImageMessageContentTemplate") as DataTemplate;
+                audioMessageContentTemplate = this.FindResource("AudioMessageContentTemplate") as DataTemplate;
+                videoMessageContentTemplate = this.FindResource("VideoMessageContentTemplate") as DataTemplate;
+
+                CatalogListView.ItemsSource = collectionModel.Stories;
+
+                if (CatalogListView.Items.Count > 0)
+                {
+                    CatalogListView.SelectedIndex = 0;
+                }
+
+                var collectionViewModel = new BasicCollectionViewModel()
+                {
+                    CoverUuid = collectionModel.CoverUuid,
+                    Desc = collectionModel.Desc,
+                    Name = collectionModel.Name,
+                    StoryCount = collectionModel.StoryCount
+                };
+                collectionViewModel.UseCustomCoverUrl(GetContentFilePath($"Image/{collectionModel.CoverUuid}.webp"));
+                IntroductionTabItem.DataContext = collectionViewModel;
+
+                exportProgressModel = new();
+                ExportProgressArea.DataContext = exportProgressModel;
             }
-            collectionModel = JsonSerializer.Deserialize<CollectionModel>(File.ReadAllText(manifestFile, Encoding.UTF8), serializerOptions);
-            InitializeComponent();
-
-            leftChatMessageTemplate = this.FindResource("LeftChatMessageTemplate") as DataTemplate;
-            rightChatMessageTemplate = this.FindResource("RightChatMessageTemplate") as DataTemplate;
-            systemChatMessageTemplate = this.FindResource("SystemChatMessageTemplate") as DataTemplate;
-            textMessageContentTemplate = this.FindResource("TextMessageContentTemplate") as DataTemplate;
-            imageMessageContentTemplate = this.FindResource("ImageMessageContentTemplate") as DataTemplate;
-            audioMessageContentTemplate = this.FindResource("AudioMessageContentTemplate") as DataTemplate;
-            videoMessageContentTemplate = this.FindResource("VideoMessageContentTemplate") as DataTemplate;
-
-            CatalogListView.ItemsSource = collectionModel.Stories;
-
-            if (CatalogListView.Items.Count > 0)
+            catch (Exception)
             {
-                CatalogListView.SelectedIndex = 0;
+                Close();
+                throw;
             }
-
-            var collectionViewModel = new BasicCollectionViewModel()
-            {
-                CoverUuid = collectionModel.CoverUuid,
-                Desc = collectionModel.Desc,
-                Name = collectionModel.Name,
-                StoryCount = collectionModel.StoryCount
-            };
-            collectionViewModel.UseCustomCoverUrl(GetContentFilePath($"Image/{collectionModel.CoverUuid}.webp"));
-            IntroductionTabItem.DataContext = collectionViewModel;
-
-            exportProgressModel = new();
-            ExportProgressArea.DataContext = exportProgressModel;
         }
 
         private void Window_Closed(object sender, EventArgs e)
