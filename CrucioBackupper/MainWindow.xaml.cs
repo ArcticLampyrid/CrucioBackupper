@@ -42,6 +42,7 @@ namespace CrucioBackupper
 
             Log.Logger = log;
             Log.Information("CrucioBackupper 已启动");
+#if !DEBUG
             Task.Run(async () =>
             {
                 var checker = new GitHubUpdateChecker("ArcticLampyrid", "CrucioBackupper");
@@ -62,6 +63,7 @@ namespace CrucioBackupper
                     });
                 }
             });
+#endif
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
