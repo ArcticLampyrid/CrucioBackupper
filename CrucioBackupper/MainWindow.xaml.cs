@@ -20,6 +20,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Serilog;
 using CrucioBackupper.LogViewer;
+using CrucioBackupper.Properties;
 
 namespace CrucioBackupper
 {
@@ -46,6 +47,37 @@ namespace CrucioBackupper
 
             loginViewModel = new LoginViewModel(api);
             LoginView.DataContext = loginViewModel;
+
+            // token persistence
+            var _ = Task.Run(async () =>
+            {
+                var token = Settings.Default.Token;
+                if (!string.IsNullOrEmpty(token))
+                {
+                    await loginViewModel.LoginViaToken(token);
+                    Settings.Default.Token = api.GetToken();
+                    Settings.Default.Save();
+                    if (loginViewModel.IsLoggedIn)
+                    {
+                        Log.Information("自动登录成功");
+                    }
+                }
+            });
+            loginViewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(LoginViewModel.IsLoggedIn))
+                {
+                    try
+                    {
+                        Settings.Default.Token = api.GetToken();
+                        Settings.Default.Save();
+                    }
+                    catch (Exception exception)
+                    {
+                        Log.Error(exception, "无法记住登陆状态，保存Token失败");
+                    }
+                }
+            };
 #if !DEBUG
             Task.Run(async () =>
             {
