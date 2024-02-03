@@ -53,20 +53,12 @@ namespace CrucioBackupper
             await JsonSerializer.SerializeAsync(stream, model, serializerOptions);
         }
 
-        private struct ResourceInfo
+        private record ResourceInfo(string Type, string Uuid, string Ext, string Url)
         {
-            public string Type { get; }
-            public string Uuid { get; }
-            public string Ext { get; }
-            public string Url { get; }
-
-            public ResourceInfo(string type, string uuid, string ext, string url)
-            {
-                Type = type ?? throw new ArgumentNullException(nameof(type));
-                Uuid = uuid ?? throw new ArgumentNullException(nameof(uuid));
-                Ext = ext ?? throw new ArgumentNullException(nameof(ext));
-                Url = url ?? throw new ArgumentNullException(nameof(url));
-            }
+            public string Type { get; } = Type;
+            public string Uuid { get; } = Uuid;
+            public string Ext { get; } = Ext;
+            public string Url { get; } = Url;
         }
 
         private async Task CopyResourceToMemoryStream(ResourceInfo resource, MemoryStream memoryStream)
@@ -85,7 +77,7 @@ namespace CrucioBackupper
 
             const int maxParallel = 10;
             var cacheStream = new MemoryStream[maxParallel];
-            var tasks = new Task[maxParallel];
+            var tasks = new Task?[maxParallel];
             for (int i = 0; i < maxParallel; i++)
             {
                 cacheStream[i] = new MemoryStream();
@@ -107,7 +99,7 @@ namespace CrucioBackupper
                         }
                         try
                         {
-                            await tasks[j];
+                            await tasks[j]!;
                         }
                         catch (Exception e)
                         {
@@ -138,7 +130,7 @@ namespace CrucioBackupper
                 .Where(x => x.CollectionUuid == collectionUuid)
                 .OrderBy(x => x.Index)
                 .ToList();
-            string coverUuid = null;
+            string? coverUuid = null;
             var storiesDetail = stories.Select(x => api.GetStoryDetail(x.Uuid)).ToList();
             var dealogInfos = stories.Select(x => api.GetAllDialog(x)).ToList();
             for (int i = 0; i < stories.Count; i++)
@@ -234,14 +226,17 @@ namespace CrucioBackupper
                 Name = collectionDetail.Data.Collections[0].Name,
                 Desc = collectionDetail.Data.Collections[0].Desc,
                 StoryCount = Math.Max(collectionDetail.Data.Collections[0].StoryCount, stories.Count),
-                CoverUuid = coverUuid,
+                CoverUuid = coverUuid ?? string.Empty,
                 Stories = stories.Select(x => new BasicStoryModel()
                 {
                     Seq = x.Index + 1,
                     Title = x.Title
                 }).ToList()
             };
-            ImageSet.Add(coverUuid);
+            if (!string.IsNullOrEmpty(coverUuid))
+            {
+                ImageSet.Add(coverUuid);
+            }
             await WriteCollection(collectionModel);
             await DownloadResource();
         }

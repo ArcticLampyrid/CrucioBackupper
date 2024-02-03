@@ -2,7 +2,7 @@
 {
     public class AudioModel
     {
-        public string Uuid { get; set; }
+        public required string Uuid { get; set; }
         public long Duration { get; set; }
     }
 }

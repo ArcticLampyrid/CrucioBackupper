@@ -7,11 +7,11 @@ namespace CrucioBackupper.ViewModel
 {
     public class BasicCollectionViewModel
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int StoryCount { get; set; }
-        public string Desc { get; set; }
-        public string CoverUuid { get; set; }
-        private string _coverUrl;
+        public string Desc { get; set; } = string.Empty;
+        public string CoverUuid { get; set; } = string.Empty;
+        private string? _coverUrl;
         public string CoverUrl => _coverUrl ?? CrucioApi.GetImageUrl(CoverUuid);
         public void UseCustomCoverUrl(string coverUrl)
         {

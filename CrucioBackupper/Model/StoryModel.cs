@@ -6,6 +6,6 @@ namespace CrucioBackupper.Model
 {
     public class StoryModel : BasicStoryModel
     {
-        public List<DialogModel> Dialogs { get; set; }
+        public required List<DialogModel> Dialogs { get; set; }
     }
 }

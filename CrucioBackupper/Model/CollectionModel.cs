@@ -6,10 +6,10 @@ namespace CrucioBackupper.Model
 {
     public class CollectionModel
     {
-        public string Name { get; set; }
-        public string Desc { get; set; }
-        public string CoverUuid { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Desc { get; set; } = string.Empty;
+        public string CoverUuid { get; set; } = string.Empty;
         public int StoryCount { get; set; }
-        public List<BasicStoryModel> Stories { get; set; }
+        public required List<BasicStoryModel> Stories { get; set; }
     }
 }

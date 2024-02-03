@@ -18,11 +18,16 @@ namespace CrucioBackupper
     /// </summary>
     public partial class MediaPlayer : Window
     {
-        private DispatcherTimer timer = null;
+        private readonly DispatcherTimer timer;
         public MediaPlayer(Uri source)
         {
             InitializeComponent();
             Player.Source = source;
+            timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            timer.Tick += Timer_Tick;
         }
 
         private void Player_MediaOpened(object sender, RoutedEventArgs e)
@@ -35,20 +40,16 @@ namespace CrucioBackupper
                 (long)Player.Position.TotalSeconds % 60,
                 (long)Player.NaturalDuration.TimeSpan.TotalSeconds / 60,
                 (long)Player.NaturalDuration.TimeSpan.TotalSeconds % 60);
-            timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += new EventHandler(timer_Tick);
             timer.Start();
         }
 
         private void Player_MediaEnded(object sender, RoutedEventArgs e)
         {
+            timer.Stop();
             this.Close();
         }
 
-        private void timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs e)
         {
             PositionSlider.Value = Player.Position.TotalSeconds;
             PositionLabel.Content = string.Format(

@@ -8,6 +8,6 @@ namespace CrucioBackupper.ViewModel
     {
         public long Duration { get; set; }
         public string DurationDesc => Duration >= 60000 ? string.Format("{0}′{1}″", Duration / 60000, (Duration % 60000) / 1000) : string.Format("{0}″", Duration / 1000);
-        public string Uuid { get; set; }
+        public required string Uuid { get; set; }
     }
 }

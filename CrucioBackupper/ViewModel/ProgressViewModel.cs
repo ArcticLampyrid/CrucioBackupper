@@ -12,7 +12,7 @@ namespace CrucioBackupper.ViewModel
         public int Current { get; private set; }
         public int Total { get; private set; }
         public double Progress => Total <= 0 ? 1 : (double)Current / Total;
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         public void SetProgress(int current, int total)
         {
             Current = current;

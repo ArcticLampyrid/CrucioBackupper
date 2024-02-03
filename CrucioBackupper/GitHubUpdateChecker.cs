@@ -22,9 +22,9 @@ namespace CrucioBackupper
             // Do nothing here
         }
 
-        private static Version GetCurrentVersion() => typeof(GitHubUpdateChecker).Assembly.GetName().Version;
+        private static Version GetCurrentVersion() => typeof(GitHubUpdateChecker).Assembly.GetName().Version ?? new Version();
 
-        public async Task<string> CheckForUpdatesAsync()
+        public async Task<string?> CheckForUpdatesAsync()
         {
             using var client = new HttpClient();
             try
@@ -34,19 +34,19 @@ namespace CrucioBackupper
                 var response = await client.GetStringAsync(url);
 
                 using var jsonDoc = JsonDocument.Parse(response);
-                var latestVersion = jsonDoc.RootElement.GetProperty("tag_name").GetString();
+                var latestVersion = jsonDoc.RootElement.GetProperty("tag_name").GetString() ?? string.Empty;
                 if (latestVersion.StartsWith('v'))
                 {
                     latestVersion = latestVersion[1..];
                 }
-                if (Version.Parse(latestVersion) > _currentVersion)
+                if (Version.TryParse(latestVersion, out var parsedVersion))
                 {
-                    return jsonDoc.RootElement.GetProperty("html_url").GetString();
+                    if (parsedVersion > _currentVersion)
+                    {
+                        return jsonDoc.RootElement.GetProperty("html_url").GetString();
+                    }
                 }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
             catch (Exception ex)
             {

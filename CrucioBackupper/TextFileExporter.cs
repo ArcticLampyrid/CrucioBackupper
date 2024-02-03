@@ -8,11 +8,13 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CrucioBackupper.Model;
+using Serilog;
 
 namespace CrucioBackupper
 {
     public class TextFileExporter(ZipArchive txtPack, ZipArchive dignPack)
     {
+        private readonly ILogger logger = Log.ForContext<TextFileExporter>();
         private readonly ZipArchive txtPack = txtPack;
         private readonly ZipArchive dignPack = dignPack;
         public async Task Export()
@@ -37,9 +39,10 @@ namespace CrucioBackupper
         {
             using var writer = new StreamWriter(txtPack.CreateEntry("Content.txt").Open(), Encoding.UTF8);
             CollectionModel collectionModel;
-            using (var collectionStream = dignPack.GetEntry("Manifest.json").Open())
+            var manifestEntry = dignPack.GetEntry("Manifest.json") ?? throw new Exception("Manifest file not found");
+            using (var collectionStream = manifestEntry.Open())
             {
-                collectionModel = await JsonSerializer.DeserializeAsync<CollectionModel>(collectionStream);
+                collectionModel = (await JsonSerializer.DeserializeAsync<CollectionModel>(collectionStream))!;
             }
             await writer.WriteLineAsync(collectionModel.Name);
             var desc = collectionModel.Desc
@@ -53,11 +56,13 @@ namespace CrucioBackupper
                 StoryModel storyModel;
                 try
                 {
-                    using var storyStream = dignPack.GetEntry($"Story/{i + 1}.json").Open();
-                    storyModel = await JsonSerializer.DeserializeAsync<StoryModel>(storyStream);
+                    var entry = dignPack.GetEntry($"Story/{i + 1}.json") ?? throw new Exception("Story file not found");
+                    using var storyStream = entry.Open();
+                    storyModel = (await JsonSerializer.DeserializeAsync<StoryModel>(storyStream))!;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    logger.Error(e, "无法导出章节 #{Seq}", i + 1);
                     await writer.WriteLineAsync($"#{i + 1}");
                     await writer.WriteLineAsync("右=Crucio，左=Backupper");
                     await writer.WriteLineAsync("旁白：故事文件损坏，无法导出");
@@ -89,16 +94,23 @@ namespace CrucioBackupper
                     switch (dialog.Type)
                     {
                         case "image":
-                            await writer.WriteLineAsync($"[图片:{dialog.Image.Uuid}]");
+                            await writer.WriteLineAsync($"[图片:{dialog.Image?.Uuid ?? "未知"}]");
                             break;
                         case "audio":
-                            await writer.WriteLineAsync($"[音频:{dialog.Audio.Uuid}]");
+                            await writer.WriteLineAsync($"[音频:{dialog.Audio?.Uuid ?? "未知"}]");
                             break;
                         case "video":
-                            await writer.WriteLineAsync($"[视频:{dialog.Video.Uuid}, 封面={dialog.Video.CoverImageUuid}]");
+                            if (dialog.Video != null && dialog.Video.CoverImageUuid != null)
+                            {
+                                await writer.WriteLineAsync($"[视频:{dialog.Video.Uuid}, 封面={dialog.Video.CoverImageUuid}]");
+                            }
+                            else
+                            {
+                                await writer.WriteLineAsync($"[视频:{dialog.Video?.Uuid ?? "未知"}]");
+                            }
                             break;
                         default:
-                            var text = dialog.Text
+                            var text = dialog.Text ?? ""
                                 .Replace("\r\n", "[换行]")
                                 .Replace("\n", "[换行]")
                                 .Replace("\r", "[换行]");

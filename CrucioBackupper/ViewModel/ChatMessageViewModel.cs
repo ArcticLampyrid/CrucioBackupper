@@ -7,8 +7,8 @@ namespace CrucioBackupper.ViewModel
 {
     public class ChatMessageViewModel
     {
-        public string AvatarPath { get; set; }
-        public string CharacterName { get; set; }
-        public FrameworkElement Content { get; set; }
+        public required string AvatarPath { get; set; }
+        public required string CharacterName { get; set; }
+        public required FrameworkElement Content { get; set; }
     }
 }

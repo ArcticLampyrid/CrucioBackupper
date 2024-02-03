@@ -25,9 +25,9 @@ namespace CrucioBackupper
         {
             Interval = new TimeSpan(0, 0, 1)
         };
-        public SsoQrInfo QrInfo { get; private set; }
-        public ValidSsoInfo ValidSsoInfo { get; private set; }
-        public string Token { get; private set; }
+        public SsoQrInfo? QrInfo { get; private set; }
+        public ValidSsoInfo? ValidSsoInfo { get; private set; }
+        public string? Token { get; private set; }
 
         public SsoQrDialog()
         {
@@ -55,9 +55,9 @@ namespace CrucioBackupper
         }
 
 
-        private async void LoopValidTimer_Tick(object sender, EventArgs e)
+        private async void LoopValidTimer_Tick(object? sender, EventArgs e)
         {
-            var (x, y) = await CrucioApi.Default.ValidSsoQrInfo(QrInfo);
+            var (x, y) = await CrucioApi.Default.ValidSsoQrInfo(QrInfo!);
             if (!x.HasError)
             {
                 loopValidTimer.Stop();

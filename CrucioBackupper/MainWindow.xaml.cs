@@ -182,7 +182,7 @@ namespace CrucioBackupper
             MessageBox.Show(this, "图片显示异常可能是由于您的电脑缺少WebP解码器，点击 确定 将开始安装解码器");
             try
             {
-                var coderInstaller = System.IO.Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "WebpCodecSetup.exe");
+                var coderInstaller = System.IO.Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase!, "WebpCodecSetup.exe");
                 var processInfo = new ProcessStartInfo
                 {
                     UseShellExecute = true,
@@ -197,14 +197,16 @@ namespace CrucioBackupper
             }
         }
 
-        private void Hyperlink_Click(object sender, RoutedEventArgs e)
+        private void Hyperlink_Click(object? sender, RoutedEventArgs e)
         {
-            Hyperlink link = sender as Hyperlink;
-            Process.Start(new ProcessStartInfo()
+            if (sender is Hyperlink link)
             {
-                UseShellExecute = true,
-                FileName = link.NavigateUri.AbsoluteUri
-            });
+                Process.Start(new ProcessStartInfo()
+                {
+                    UseShellExecute = true,
+                    FileName = link.NavigateUri.AbsoluteUri
+                });
+            }
         }
 
         private void SsoQr_Click(object sender, RoutedEventArgs e)

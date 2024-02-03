@@ -8,7 +8,7 @@ namespace CrucioBackupper
 {
     public class ImageCacheOnLoadConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object? Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             var path = (string)value;
             if (path == null)

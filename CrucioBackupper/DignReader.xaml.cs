@@ -49,7 +49,11 @@ namespace CrucioBackupper
             var result = Path.GetFullPath(Path.Combine(resourceDirectory, relativePath));
             if (extractedFiles.Add(relativePath))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(result));
+                var directory = Path.GetDirectoryName(result);
+                if (directory != null)
+                {
+                    Directory.CreateDirectory(directory);
+                }
                 archive.GetEntry(relativePath)?.ExtractToFile(result, true);
             }
             return result;
@@ -71,16 +75,16 @@ namespace CrucioBackupper
                 {
                     throw new InvalidOperationException("Manifest.json not found");
                 }
-                collectionModel = JsonSerializer.Deserialize<CollectionModel>(File.ReadAllText(manifestFile, Encoding.UTF8), serializerOptions);
+                collectionModel = JsonSerializer.Deserialize<CollectionModel>(File.ReadAllText(manifestFile, Encoding.UTF8), serializerOptions)!;
                 InitializeComponent();
 
-                leftChatMessageTemplate = this.FindResource("LeftChatMessageTemplate") as DataTemplate;
-                rightChatMessageTemplate = this.FindResource("RightChatMessageTemplate") as DataTemplate;
-                systemChatMessageTemplate = this.FindResource("SystemChatMessageTemplate") as DataTemplate;
-                textMessageContentTemplate = this.FindResource("TextMessageContentTemplate") as DataTemplate;
-                imageMessageContentTemplate = this.FindResource("ImageMessageContentTemplate") as DataTemplate;
-                audioMessageContentTemplate = this.FindResource("AudioMessageContentTemplate") as DataTemplate;
-                videoMessageContentTemplate = this.FindResource("VideoMessageContentTemplate") as DataTemplate;
+                leftChatMessageTemplate = (DataTemplate)this.FindResource("LeftChatMessageTemplate");
+                rightChatMessageTemplate = (DataTemplate)this.FindResource("RightChatMessageTemplate");
+                systemChatMessageTemplate = (DataTemplate)this.FindResource("SystemChatMessageTemplate");
+                textMessageContentTemplate = (DataTemplate)this.FindResource("TextMessageContentTemplate");
+                imageMessageContentTemplate = (DataTemplate)this.FindResource("ImageMessageContentTemplate");
+                audioMessageContentTemplate = (DataTemplate)this.FindResource("AudioMessageContentTemplate");
+                videoMessageContentTemplate = (DataTemplate)this.FindResource("VideoMessageContentTemplate");
 
                 CatalogListView.ItemsSource = collectionModel.Stories;
 
@@ -124,18 +128,26 @@ namespace CrucioBackupper
 
         private void AddDialogsToUICollection(UIElementCollection collection, int seq)
         {
-            var storyModel = JsonSerializer.Deserialize<StoryModel>(File.ReadAllText(GetContentFilePath($"Story/{seq}.json"), Encoding.UTF8), serializerOptions);
+            var storyModel = JsonSerializer.Deserialize<StoryModel>(File.ReadAllText(GetContentFilePath($"Story/{seq}.json"), Encoding.UTF8), serializerOptions)!;
             foreach (var dialog in storyModel.Dialogs)
             {
                 FrameworkElement content;
                 switch (dialog.Type)
                 {
                     case "image":
-                        content = (imageMessageContentTemplate.LoadContent() as FrameworkElement);
+                        content = (FrameworkElement)imageMessageContentTemplate.LoadContent();
+                        if (dialog.Image == null)
+                        {
+                            throw new InvalidOperationException("Image dialog without image content");
+                        }
                         content.DataContext = GetContentFilePath($"Image/{dialog.Image.Uuid}.webp");
                         break;
                     case "audio":
-                        content = (audioMessageContentTemplate.LoadContent() as FrameworkElement);
+                        content = (FrameworkElement)audioMessageContentTemplate.LoadContent();
+                        if (dialog.Audio == null)
+                        {
+                            throw new InvalidOperationException("Audio dialog without audio content");
+                        }
                         content.DataContext = new AudioMessageContentViewModel()
                         {
                             Duration = dialog.Audio.Duration,
@@ -143,7 +155,11 @@ namespace CrucioBackupper
                         };
                         break;
                     case "video":
-                        content = (videoMessageContentTemplate.LoadContent() as FrameworkElement);
+                        content = (FrameworkElement)videoMessageContentTemplate.LoadContent();
+                        if (dialog.Video == null)
+                        {
+                            throw new InvalidOperationException("Video dialog without video content");
+                        }
                         content.DataContext = new VideoMessageContentViewModel()
                         {
                             Duration = dialog.Video.Duration,
@@ -152,7 +168,7 @@ namespace CrucioBackupper
                         };
                         break;
                     default:
-                        content = (textMessageContentTemplate.LoadContent() as FrameworkElement);
+                        content = (FrameworkElement)textMessageContentTemplate.LoadContent();
                         content.DataContext = dialog.Text;
                         break;
                 }
@@ -169,7 +185,7 @@ namespace CrucioBackupper
                     2 => leftChatMessageTemplate,
                     _ => throw new NotSupportedException(),
                 };
-                var chatMessageControl = chatMessageTemplate.LoadContent() as FrameworkElement;
+                var chatMessageControl = (FrameworkElement)chatMessageTemplate.LoadContent();
                 chatMessageControl.DataContext = chatMessageViewModel;
                 collection.Add(chatMessageControl);
             }
@@ -191,14 +207,18 @@ namespace CrucioBackupper
 
         private void PlayAudioButton_Click(object sender, RoutedEventArgs e)
         {
-            var dataContext = (sender as Button).DataContext as AudioMessageContentViewModel;
-            new MediaPlayer(new Uri(GetContentFilePath($"Audio/{dataContext.Uuid}.m4a"))).ShowDialog();
+            if (sender is Button { DataContext: AudioMessageContentViewModel dataContext })
+            {
+                new MediaPlayer(new Uri(GetContentFilePath($"Audio/{dataContext.Uuid}.m4a"))).ShowDialog();
+            }
         }
 
         private void PlayVideoButton_Click(object sender, RoutedEventArgs e)
         {
-            var dataContext = (sender as Button).DataContext as VideoMessageContentViewModel;
-            new MediaPlayer(new Uri(GetContentFilePath($"Video/{dataContext.Uuid}.mp4"))).ShowDialog();
+            if (sender is Button { DataContext: VideoMessageContentViewModel dataContext })
+            {
+                new MediaPlayer(new Uri(GetContentFilePath($"Audio/{dataContext.Uuid}.mp4"))).ShowDialog();
+            }
         }
 
         private void DialogScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -218,7 +238,10 @@ namespace CrucioBackupper
 
         private void SaveImageMessageMenu_Click(object sender, RoutedEventArgs e)
         {
-            var path = (sender as FrameworkElement).DataContext as string;
+            if (sender is not FrameworkElement { DataContext: string path })
+            {
+                return;
+            }
             var dialog = new SaveFileDialog()
             {
                 Filter = "WebP图像文件(*.webp)|*.webp",
@@ -232,7 +255,10 @@ namespace CrucioBackupper
 
         private void SaveAvatarMenu_Click(object sender, RoutedEventArgs e)
         {
-            var dataContext = (sender as FrameworkElement).DataContext as ChatMessageViewModel;
+            if (sender is not FrameworkElement { DataContext: ChatMessageViewModel dataContext })
+            {
+                return;
+            }
             var path = dataContext.AvatarPath;
             var dialog = new SaveFileDialog()
             {
@@ -247,7 +273,10 @@ namespace CrucioBackupper
 
         private void SaveAudioMessageMenu_Click(object sender, RoutedEventArgs e)
         {
-            var dataContext = (sender as FrameworkElement).DataContext as AudioMessageContentViewModel;
+            if (sender is not FrameworkElement { DataContext: AudioMessageContentViewModel dataContext })
+            {
+                return;
+            }
             var path = GetContentFilePath($"Audio/{dataContext.Uuid}.m4a");
             var dialog = new SaveFileDialog()
             {
@@ -262,7 +291,10 @@ namespace CrucioBackupper
 
         private void SaveVideoMessageMenu_Click(object sender, RoutedEventArgs e)
         {
-            var dataContext = (sender as FrameworkElement).DataContext as VideoMessageContentViewModel;
+            if (sender is not FrameworkElement { DataContext: VideoMessageContentViewModel dataContext })
+            {
+                return;
+            }
             var path = GetContentFilePath($"Video/{dataContext.Uuid}.mp4");
             var dialog = new SaveFileDialog()
             {
@@ -277,7 +309,10 @@ namespace CrucioBackupper
 
         private void SaveCoverMenu_Click(object sender, RoutedEventArgs e)
         {
-            var dataContext = (sender as FrameworkElement).DataContext as BasicCollectionViewModel;
+            if (sender is not FrameworkElement { DataContext: BasicCollectionViewModel dataContext })
+            {
+                return;
+            }
             var path = dataContext.CoverUrl;
             var dialog = new SaveFileDialog()
             {
@@ -303,7 +338,7 @@ namespace CrucioBackupper
             var dialog = new SaveFileDialog()
             {
                 Filter = "ZIP压缩文件(*.zip)|*.zip",
-                FileName = collectionViewModel.Name + ".zip"
+                FileName = $"{collectionViewModel?.Name ?? "神秘作品"}.zip"
             };
             if (dialog.ShowDialog().GetValueOrDefault(false))
             {
@@ -335,7 +370,7 @@ namespace CrucioBackupper
                 var dialog = new SaveFileDialog()
                 {
                     Filter = "ZIP压缩文件(*.zip)|*.zip",
-                    FileName = collectionViewModel.Name + ".zip"
+                    FileName = $"{collectionViewModel?.Name ?? "神秘作品"}.zip"
                 };
                 if (!dialog.ShowDialog().GetValueOrDefault(false))
                 {

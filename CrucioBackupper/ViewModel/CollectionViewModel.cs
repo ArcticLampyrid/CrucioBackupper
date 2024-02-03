@@ -9,14 +9,14 @@ namespace CrucioBackupper.ViewModel
 {
     public class CollectionViewModel : BasicCollectionViewModel
     {
-        public string Uuid { get; set; }
+        public required string Uuid { get; set; }
         public long ClickCount { get; set; }
         public int LikeCount { get; set; }
         public string ClickCountDesc => GetNumberDesc(ClickCount);
         public string LikeCountDesc => GetNumberDesc(LikeCount);
         public bool IsVideo { get; set; } = false;
-        public string ShareUuid { get; set; }
-        public string Author { get; set; }
+        public string ShareUuid { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
 
         private static string GetNumberDesc(long x) => x switch
         {
