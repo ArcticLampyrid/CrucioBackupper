@@ -52,6 +52,11 @@ namespace CrucioNetwork
             cookieContainer.Add(cookie);
         }
 
+        public string GetToken()
+        {
+            return cookieContainer.GetCookies(new Uri($"https://{ApiDomain}"))["token"]?.Value;
+        }
+
         private static readonly JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
         {
             IgnoreNullValues = true
@@ -230,6 +235,11 @@ namespace CrucioNetwork
         {
             var body = await client.GetStringAsync("https://editor.kuaidianyuedu.com/api/v1/sso/qr_info");
             return JsonSerializer.Deserialize<ApiResult<SsoQrInfo>>(body, serializerOptions);
+        }
+
+        public async Task<ApiResult<CurrentUserInfo>> GetCurrentUserInfo()
+        {
+            return await ApiGet<ApiResult<CurrentUserInfo>>("/v12/user");
         }
 
         public async Task<(ApiResult<ValidSsoInfo>, string)> ValidSsoQrInfo(SsoQrInfo qrInfo)

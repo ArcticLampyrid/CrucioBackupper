@@ -29,6 +29,7 @@ namespace CrucioBackupper
     public partial class MainWindow : Window
     {
         private readonly CrucioApi api = CrucioApi.Default;
+        private readonly LoginViewModel loginViewModel;
         public MainWindow()
         {
             InitializeComponent();
@@ -42,6 +43,9 @@ namespace CrucioBackupper
 
             Log.Logger = log;
             Log.Information("CrucioBackupper 已启动");
+
+            loginViewModel = new LoginViewModel(api);
+            LoginView.DataContext = loginViewModel;
 #if !DEBUG
             Task.Run(async () =>
             {
@@ -139,7 +143,6 @@ namespace CrucioBackupper
                 {
                     File.Delete(path);
                 }
-                api.SetToken(TokenTextBox.Text);
                 using var target = ZipFile.Open(path, ZipArchiveMode.Create);
                 await new CrucioDownloader(api, collectionUuid, target).Download();
             }
@@ -214,9 +217,9 @@ namespace CrucioBackupper
             var dialog = new SsoQrDialog();
             dialog.ShowDialog();
             var validSsoInfo = dialog.ValidSsoInfo;
-            if (validSsoInfo != null)
+            if (validSsoInfo != null && dialog.Token != null)
             {
-                TokenTextBox.Text = dialog.Token;
+                _ = loginViewModel.LoginViaToken(dialog.Token);
                 MessageBox.Show(this, $"欢迎您，{validSsoInfo.User.Name}（{validSsoInfo.User.AuthorTypeText}）", "登录成功");
             }
         }
@@ -250,6 +253,29 @@ namespace CrucioBackupper
                     Log.Error(exception, "打开对话小说文件失败");
                 }
             }
+        }
+
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            loginViewModel.Logout();
+        }
+
+        private void LoginViaTokenButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new LoginViaTokenDialog();
+            dialog.ShowDialog();
+            if (dialog.Token != null)
+            {
+                _ = loginViewModel.LoginViaToken(dialog.Token);
+            }
+        }
+
+        private void CopyTokenHyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            var token = api.GetToken();
+            Clipboard.SetText(token ?? "未登录");
+            MessageBox.Show(this, "Token 已复制到剪贴板");
+            e.Handled = true;
         }
     }
 }

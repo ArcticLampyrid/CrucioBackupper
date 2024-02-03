@@ -56,31 +56,79 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Label Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Center">帐号Token</Label>
-            <DockPanel Grid.Row="0" Grid.Column="1">
-                <Button DockPanel.Dock="Right" x:Name="SsoQr" Click="SsoQr_Click">扫码登录</Button>
-                <TextBox VerticalContentAlignment="Center" x:Name="TokenTextBox">
-                    <TextBox.Resources>
-                        <VisualBrush x:Key="HintText" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
-                            <VisualBrush.Visual>
-                                <TextBlock Text="VIP文章需要提供能够解锁相应章节的帐号的Token" />
-                            </VisualBrush.Visual>
-                        </VisualBrush>
-                    </TextBox.Resources>
-                    <TextBox.Style>
-                        <Style TargetType="TextBox">
+            <Label Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Center">登陆帐号</Label>
+            <Grid Grid.Row="0" Grid.Column="1" d:DataContext="{d:DesignInstance Type=vm:LoginViewModel}" x:Name="LoginView">
+                <DockPanel>
+                    <DockPanel.Style>
+                        <Style TargetType="{x:Type DockPanel}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
-                                <Trigger Property="Text" Value="{x:Null}">
-                                    <Setter Property="Background" Value="{StaticResource HintText}"/>
-                                </Trigger>
-                                <Trigger Property="Text" Value="">
-                                    <Setter Property="Background" Value="{StaticResource HintText}"/>
-                                </Trigger>
+                                <DataTrigger Binding="{Binding IsLoggedIn}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBox.Style>
-                </TextBox>
-            </DockPanel>
+                    </DockPanel.Style>
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                        <Button Margin="5,0,0,0" x:Name="LoginViaTokenButton" Click="LoginViaTokenButton_Click">使用 Token 登陆（高级）</Button>
+                        <Button Margin="5,0,0,0" x:Name="SsoQr" Click="SsoQr_Click">扫码登录</Button>
+                    </StackPanel>
+                    <TextBlock Text="未登录（注意：VIP文章需要提供能够解锁相应章节的帐号）" VerticalAlignment="Center"/>
+                </DockPanel>
+                <DockPanel>
+                    <DockPanel.Style>
+                        <Style TargetType="{x:Type DockPanel}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLoggedIn}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DockPanel.Style>
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                        <TextBlock Margin="5,0,0,0" VerticalAlignment="Center">
+                            <Hyperlink x:Name="CopyTokenHyperlink" Click="CopyTokenHyperlink_Click">复制 Token</Hyperlink>
+                        </TextBlock>
+                        <Button Margin="5,0,0,0" x:Name="LogoutButton" Click="LogoutButton_Click">注销</Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Width="18" Height="18" VerticalAlignment="Center">
+                                <Image.Clip>
+                                    <EllipseGeometry RadiusX="9" RadiusY="9" Center="9,9"/>
+                                </Image.Clip>
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Source" Value="{Binding AvatarUrl}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AvatarUrl}" Value="{x:Null}">
+                                                <Setter Property="Source" Value="{x:Null}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <TextBlock Text="{Binding Nickname}" VerticalAlignment="Center"/>
+                            <TextBlock VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value=""/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsVip}" Value="True">
+                                                <Setter Property="Text" Value="（VIP）"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsSvip}" Value="True">
+                                                <Setter Property="Text" Value="（SVIP）"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Grid>
             <Label Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center">文章Uuid</Label>
             <DockPanel Grid.Row="1" Grid.Column="1">
                 <Button DockPanel.Dock="Right" x:Name="DownloadButton" Click="DownloadButton_Click" IsDefault="{Binding IsFocused, ElementName=CollectionUuidTextBox}">下载</Button>
