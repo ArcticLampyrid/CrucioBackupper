@@ -115,6 +115,14 @@ namespace CrucioBackupper
                 return;
             }
 
+            if (MessageBox.Show(this, "检测到您当前未登陆，将无法保存需要解锁的章节部分。" + Environment.NewLine + "是否继续？",
+                Title,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
             var fileName = string.Empty;
             if (SearchResultListView.ItemsSource is List<CollectionViewModel> viewModel)
             {
