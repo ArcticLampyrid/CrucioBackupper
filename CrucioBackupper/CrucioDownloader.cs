@@ -126,6 +126,9 @@ namespace CrucioBackupper
         public async Task Download()
         {
             var collectionDetail = await api.GetCollectionDetail(collectionUuid);
+            collectionDetail.MakeSureNoError();
+            var collection = collectionDetail?.Data?.Collections?.Where(x => x.Uuid == collectionUuid)?.FirstOrDefault() 
+                ?? throw new Exception("Collection is not found");
             var stories = collectionDetail.Data.Stories
                 .Where(x => x.CollectionUuid == collectionUuid)
                 .OrderBy(x => x.Index)
@@ -212,8 +215,11 @@ namespace CrucioBackupper
                             return result;
                         }).ToList()
                     };
+                    if (storyModel.Dialogs.Count == 0)
+                    {
+                        logger.Warning("章节 #{Seq}({Uuid}) 为空", storyBrief.Index + 1, storyBrief.Uuid);
+                    }
                     await WriteStory(storyModel);
-                    logger.Information("下载章节 #{Seq}({Uuid}) 成功", storyBrief.Index + 1, storyBrief.Uuid);
                 }
                 catch (Exception e)
                 {
@@ -221,11 +227,13 @@ namespace CrucioBackupper
                     continue;
                 }
             }
+            var storyCount = Math.Max(collection.StoryCount, stories.Count);
+            logger.Information("文字部分下载完毕，共 {StoryCount} 章", storyCount);
             var collectionModel = new CollectionModel()
             {
-                Name = collectionDetail.Data.Collections[0].Name,
-                Desc = collectionDetail.Data.Collections[0].Desc,
-                StoryCount = Math.Max(collectionDetail.Data.Collections[0].StoryCount, stories.Count),
+                Name = collection.Name,
+                Desc = collection.Desc,
+                StoryCount = storyCount,
                 CoverUuid = coverUuid ?? string.Empty,
                 Stories = stories.Select(x => new BasicStoryModel()
                 {
