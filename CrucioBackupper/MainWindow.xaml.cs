@@ -19,7 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Serilog;
-using SerilogViewer;
+using CrucioBackupper.LogViewer;
 
 namespace CrucioBackupper
 {
@@ -32,10 +32,14 @@ namespace CrucioBackupper
         public MainWindow()
         {
             InitializeComponent();
+
+            var logViewModel = new LogViewModel();
             var log = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
-                .WriteTo.SerilogViewerSink(LogViewer)
+                .WriteTo.Sink(new SerilogViewerSink(null, logViewModel))
                 .CreateLogger();
+            LogViewer.DataContext = logViewModel;
+
             Log.Logger = log;
             Log.Information("CrucioBackupper 已启动");
             Task.Run(async () =>

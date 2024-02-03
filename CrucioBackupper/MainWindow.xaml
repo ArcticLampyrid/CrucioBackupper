@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CrucioBackupper"
-        xmlns:serilogviewer="clr-namespace:SerilogViewer;assembly=SerilogViewer"
         xmlns:vm="clr-namespace:CrucioBackupper.ViewModel"
+        xmlns:logviewer="clr-namespace:CrucioBackupper.LogViewer"
         mc:Ignorable="d"
         Title="快点阅读文章备份器" Height="500" Width="800"
         AllowDrop="True"
@@ -160,7 +160,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <serilogviewer:SerilogViewer Grid.Row="1" x:Name="LogViewer" TimeWidth="120" ContextWidth="130" LevelWidth="80" MessageWidth="290" ExceptionWidth="140" />
+            <logviewer:LogViewerControl Grid.Row="1" x:Name="LogViewer" />
         </Grid>
     </DockPanel>
 </Window>
