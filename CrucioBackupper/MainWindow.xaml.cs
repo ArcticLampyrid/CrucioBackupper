@@ -139,12 +139,15 @@ namespace CrucioBackupper
             try
             {
                 DownloadButton.IsEnabled = false;
-                if (File.Exists(path))
+                await Task.Run(async () =>
                 {
-                    File.Delete(path);
-                }
-                using var target = ZipFile.Open(path, ZipArchiveMode.Create);
-                await new CrucioDownloader(api, collectionUuid, target).Download();
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                    using var target = ZipFile.Open(path, ZipArchiveMode.Create);
+                    await new CrucioDownloader(api, collectionUuid, target).Download();
+                });
             }
             catch (Exception exception)
             {
