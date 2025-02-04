@@ -40,6 +40,7 @@ namespace CrucioNetwork
                 CookieContainer = cookieContainer
             });
             client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/4.01.03.1 (Android/28;Build/HUAWEI GLK-AL00;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
+
         }
 
         public void SetToken(string token)
@@ -146,21 +147,25 @@ namespace CrucioNetwork
 
         public async Task<Stream> HttpRequest(HttpRequestMessage request)
         {
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var queryList = HttpUtility.ParseQueryString(request.RequestUri.Query);
-            var queryInfo = string.Join("&", queryList.AllKeys.OrderBy(x => x).Select(x => $"{Uri.EscapeDataString(x)}={Uri.EscapeDataString(queryList[x]).Replace("%3D", "%253D")}"));
-            var requestBodySHA256 = request.Content != null
-                ? HexConvert.ToStringLC(SHA256.Create().ComputeHash(await request.Content.ReadAsStreamAsync()))
-                : EmptyContentSHA256;
-            var requestInfo = $"{request.Method.Method}\n{request.RequestUri.AbsolutePath}\n{queryInfo}\nx-crucio-timestamp:{timestamp}\n{requestBodySHA256}";
-            var requestInfoSHA256 = HexConvert.ToStringLC(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(requestInfo)));
-            var signInfo = $"KD1\n{timestamp}\nb975487c3cc1867a9a0bd87a63aae258ac776a06\n{requestInfoSHA256}";
-            var hmacKey = request.RequestUri.Host == ApiDomain ? ApiSignKey : NormalSignKey;
-            var sign = HexConvert.ToStringLC(new HMACSHA256(hmacKey).ComputeHash(Encoding.UTF8.GetBytes(signInfo)));
-            request.Headers.Add("X-Crucio-Timestamp", timestamp.ToString());
-            request.Headers.Add("Authorization", $"KD1 Credential=10001, Signature={sign}");
+            if (request.RequestUri?.Host == ApiDomain)
+            {
+                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var queryList = HttpUtility.ParseQueryString(request.RequestUri.Query);
+                var queryInfo = string.Join("&", queryList.AllKeys.OrderBy(x => x).Select(x => $"{Uri.EscapeDataString(x)}={Uri.EscapeDataString(queryList[x]).Replace("%3D", "%253D")}"));
+                var requestBodySHA256 = request.Content != null
+                    ? HexConvert.ToStringLC(SHA256.Create().ComputeHash(await request.Content.ReadAsStreamAsync()))
+                    : EmptyContentSHA256;
+                var requestInfo = $"{request.Method.Method}\n{request.RequestUri.AbsolutePath}\n{queryInfo}\nx-crucio-timestamp:{timestamp}\n{requestBodySHA256}";
+                var requestInfoSHA256 = HexConvert.ToStringLC(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(requestInfo)));
+                var signInfo = $"KD1\n{timestamp}\nb975487c3cc1867a9a0bd87a63aae258ac776a06\n{requestInfoSHA256}";
+                var hmacKey = request.RequestUri.Host == ApiDomain ? ApiSignKey : NormalSignKey;
+                var sign = HexConvert.ToStringLC(new HMACSHA256(hmacKey).ComputeHash(Encoding.UTF8.GetBytes(signInfo)));
+                request.Headers.Add("X-Crucio-Timestamp", timestamp.ToString());
+                request.Headers.Add("Authorization", $"KD1 Credential=10001, Signature={sign}");
+            }
 
             var responseMessage = await client.SendAsync(request);
+            responseMessage.EnsureSuccessStatusCode();
             var result = await responseMessage.Content.ReadAsStreamAsync();
             if (responseMessage.Headers.Contains("X-Crucio-Codec") && responseMessage.Headers.GetValues("X-Crucio-Codec").First() == "1")
             {
