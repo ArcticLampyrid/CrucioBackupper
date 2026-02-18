@@ -40,15 +40,10 @@ jobs:
         shell: pwsh
         run: dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained true -o artifacts/win-self-contained
 
-      - name: Publish Windows framework-dependent
-        shell: pwsh
-        run: dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained false -p:UseAppHost=true -o artifacts/win-framework-dependent
-
       - name: Archive Windows outputs
         shell: pwsh
         run: |
           Compress-Archive -Path "artifacts/win-self-contained/*" -DestinationPath "artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-self-contained.zip" -Force
-          Compress-Archive -Path "artifacts/win-framework-dependent/*" -DestinationPath "artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-framework-dependent.zip" -Force
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -56,7 +51,6 @@ jobs:
           name: windows-release-assets
           path: |
             artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-self-contained.zip
-            artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-framework-dependent.zip
           if-no-files-found: error
 
   build-linux-packages:

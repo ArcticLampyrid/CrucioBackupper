@@ -29,6 +29,16 @@
   <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier.StartsWith(`win`))' == 'True'">
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.23" />
   </ItemGroup>
+  
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <VlcWindowsX64Enabled>true</VlcWindowsX64Enabled>
+    <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x86'">
+    <VlcWindowsX64Enabled>false</VlcWindowsX64Enabled>
+    <VlcWindowsX86Enabled>true</VlcWindowsX86Enabled>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CrucioNetwork\CrucioNetwork.csproj" />
