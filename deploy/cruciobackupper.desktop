@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CrucioBackupper
+Comment=CrucioReader backup tool
+Exec=cruciobackupper
+Terminal=false
+Categories=Utility;
+StartupNotify=true

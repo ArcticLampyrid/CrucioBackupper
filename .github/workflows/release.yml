@@ -60,7 +60,7 @@ jobs:
           if-no-files-found: error
 
   build-linux-packages:
-    name: Build Linux DEB/RPM
+    name: Build Linux DEB/RPM/Arch
     runs-on: ubuntu-latest
 
     steps:
@@ -89,11 +89,16 @@ jobs:
         run: |
           mkdir -p artifacts/pkgroot/opt/cruciobackupper
           mkdir -p artifacts/pkgroot/usr/bin
+          mkdir -p artifacts/pkgroot/usr/share/applications
           cp -R artifacts/linux-framework-dependent/. artifacts/pkgroot/opt/cruciobackupper/
+          cp deploy/cruciobackupper.desktop artifacts/pkgroot/usr/share/applications/cruciobackupper.desktop
           ln -s /opt/cruciobackupper/CrucioBackupper artifacts/pkgroot/usr/bin/cruciobackupper
 
-      - name: Install fpm
-        run: sudo gem install --no-document fpm
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools zstd
+          sudo gem install --no-document fpm
 
       - name: Build DEB package
         run: |
@@ -127,6 +132,22 @@ jobs:
             -p "artifacts/${APP_NAME}-${{ steps.version_meta.outputs.version }}-linux-x64.rpm" \
             .
 
+      - name: Build Arch package
+        run: |
+          fpm -s dir -t pacman -C artifacts/pkgroot \
+            -n cruciobackupper \
+            -v "${{ steps.version_meta.outputs.version }}" \
+            --iteration 1 \
+            -a x86_64 \
+            --license MIT \
+            --url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --maintainer "CrucioBackupper maintainers" \
+            --description "CrucioReader backup tool" \
+            --depends "dotnet-runtime" \
+            --depends "vlc" \
+            -p "artifacts/${APP_NAME}-${{ steps.version_meta.outputs.version }}-linux-x64.pkg.tar.zst" \
+            .
+
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
         with:
@@ -134,6 +155,7 @@ jobs:
           path: |
             artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-linux-x64.deb
             artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-linux-x64.rpm
+            artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-linux-x64.pkg.tar.zst
           if-no-files-found: error
 
   release:
