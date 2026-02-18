@@ -3,6 +3,7 @@ using CrucioNetwork.Model;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Serilog;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -20,6 +21,8 @@ public partial class SsoQrDialog : Window
     {
         Interval = TimeSpan.FromSeconds(1)
     };
+
+    private bool isValidating;
 
     public SsoQrInfo? QrInfo { get; private set; }
     public ValidSsoInfo? ValidSsoInfo { get; private set; }
@@ -55,6 +58,7 @@ public partial class SsoQrDialog : Window
         }
         catch (Exception exception)
         {
+            Log.Warning(exception, "加载二维码失败");
             await MessageBoxManager.GetMessageBoxStandard("扫码登录", $"加载二维码失败：{exception.Message}", ButtonEnum.Ok).ShowWindowDialogAsync(this);
             Close();
         }
@@ -62,18 +66,30 @@ public partial class SsoQrDialog : Window
 
     private async void LoopValidTimer_Tick(object? sender, EventArgs e)
     {
-        if (QrInfo == null)
+        if (QrInfo == null || isValidating)
         {
             return;
         }
 
-        var (validInfo, token) = await CrucioApi.Default.ValidSsoQrInfo(QrInfo);
-        if (!validInfo.HasError)
+        try
         {
-            loopValidTimer.Stop();
-            ValidSsoInfo = validInfo.Data;
-            Token = token;
-            Close();
+            isValidating = true;
+            var (validInfo, token) = await CrucioApi.Default.ValidSsoQrInfo(QrInfo);
+            if (!validInfo.HasError)
+            {
+                loopValidTimer.Stop();
+                ValidSsoInfo = validInfo.Data;
+                Token = token;
+                Close();
+            }
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, "验证二维码状态失败");
+        }
+        finally
+        {
+            isValidating = false;
         }
     }
 }
