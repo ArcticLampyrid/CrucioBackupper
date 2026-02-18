@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CrucioBackupper.Model;
@@ -110,7 +108,7 @@ namespace CrucioBackupper
                             }
                             break;
                         default:
-                            var text = dialog.Text ?? ""
+                            var text = (dialog.Text ?? "")
                                 .Replace("\r\n", "[换行]")
                                 .Replace("\n", "[换行]")
                                 .Replace("\r", "[换行]");
