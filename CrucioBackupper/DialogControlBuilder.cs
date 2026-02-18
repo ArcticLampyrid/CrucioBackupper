@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CrucioBackupper;
 
-public sealed class DialogsViewBuilder
+public sealed class DialogControlBuilder
 {
     public interface ResourceProvider
     {
@@ -29,46 +29,35 @@ public sealed class DialogsViewBuilder
     }
 
     private readonly ResourceProvider resourceProvider;
-    private readonly BasicStoryModel story;
-    private readonly IReadOnlyList<DialogModel> dialogs;
     private readonly RenderOptions renderOptions;
     private readonly IImage audioIcon;
 
-    public DialogsViewBuilder(
+    public DialogControlBuilder(
         ResourceProvider resourceProvider,
-        BasicStoryModel story,
-        IReadOnlyList<DialogModel> dialogs,
         RenderOptions? renderOptions = null)
     {
         this.resourceProvider = resourceProvider ?? throw new ArgumentNullException(nameof(resourceProvider));
-        this.story = story ?? throw new ArgumentNullException(nameof(story));
-        this.dialogs = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
         this.renderOptions = renderOptions ?? new RenderOptions();
         audioIcon = ResolveAudioIcon();
     }
 
-    public void AddTo(Controls collection)
+    public Control RenderDialog(DialogModel dialog)
     {
-        ArgumentNullException.ThrowIfNull(collection);
-
-        foreach (var dialog in dialogs)
+        var content = dialog.Type switch
         {
-            var content = dialog.Type switch
-            {
-                "image" => CreateImageMessageControl(dialog),
-                "audio" => CreateAudioMessageControl(dialog),
-                "video" => CreateVideoMessageControl(dialog),
-                _ => CreateTextMessageControl(dialog)
-            };
-            var transparentBackground = dialog.Type == "image" || dialog.Type == "video";
-            collection.Add(dialog.Character.Role switch
-            {
-                0 => CreateSystemChatMessageControl(content, transparentBackground),
-                1 => CreateRightChatMessageControl(dialog, content, transparentBackground),
-                2 => CreateLeftChatMessageControl(dialog, content, transparentBackground),
-                _ => throw new NotSupportedException($"Unsupported character role: {dialog.Character.Role} (Story {story.Seq})")
-            });
-        }
+            "image" => CreateImageMessageControl(dialog),
+            "audio" => CreateAudioMessageControl(dialog),
+            "video" => CreateVideoMessageControl(dialog),
+            _ => CreateTextMessageControl(dialog)
+        };
+        var transparentBackground = dialog.Type == "image" || dialog.Type == "video";
+        return dialog.Character.Role switch
+        {
+            0 => CreateSystemChatMessageControl(content, transparentBackground),
+            1 => CreateRightChatMessageControl(dialog, content, transparentBackground),
+            2 => CreateLeftChatMessageControl(dialog, content, transparentBackground),
+            _ => throw new NotSupportedException($"Unsupported character role: {dialog.Character.Role}")
+        };
     }
 
     private Control CreateLeftChatMessageControl(DialogModel dialog, Control content, bool transparentBackground = false)
@@ -175,7 +164,7 @@ public sealed class DialogsViewBuilder
     {
         if (dialog.Image == null)
         {
-            throw new InvalidOperationException($"Image dialog without image content (Story {story.Seq})");
+            throw new InvalidOperationException($"Image dialog without image content");
         }
 
         return new Image
@@ -193,7 +182,7 @@ public sealed class DialogsViewBuilder
     {
         if (dialog.Audio == null)
         {
-            throw new InvalidOperationException($"Audio dialog without audio content (Story {story.Seq})");
+            throw new InvalidOperationException($"Audio dialog without audio content");
         }
 
         var layout = new StackPanel
@@ -236,7 +225,7 @@ public sealed class DialogsViewBuilder
     {
         if (dialog.Video == null)
         {
-            throw new InvalidOperationException($"Video dialog without video content (Story {story.Seq})");
+            throw new InvalidOperationException($"Video dialog without video content");
         }
 
 

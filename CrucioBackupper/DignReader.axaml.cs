@@ -2,11 +2,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Layout;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using Avalonia.Themes.Simple;
+using Avalonia.Threading;
 using CrucioBackupper.Model;
 using CrucioBackupper.ViewModel;
 using MsBox.Avalonia;
@@ -28,7 +26,7 @@ public partial class DignReader : Window
     private readonly string resourceDirectory;
     private readonly CollectionModel collectionModel;
     private readonly ProgressViewModel exportProgressModel;
-    private readonly DialogsViewBuilder.ResourceProvider dialogsResourceProvider;
+    private readonly DialogControlBuilder.ResourceProvider dialogsResourceProvider;
     private readonly ZipArchive? archive;
     private readonly HashSet<string> extractedFiles = [];
     private readonly LocalFileImageLoader imageLoader = new();
@@ -40,8 +38,7 @@ public partial class DignReader : Window
         WriteIndented = true
     };
 
-    private static readonly DialogsViewBuilder.RenderOptions interactiveRenderOptions = new();
-    private static readonly DialogsViewBuilder.RenderOptions offscreenRenderOptions = new() { IsOffscreen = true };
+    private static readonly DialogControlBuilder.RenderOptions interactiveRenderOptions = new();
 
     public DignReader() : this(fileName: null)
     {
@@ -146,12 +143,12 @@ public partial class DignReader : Window
             ?? throw new InvalidOperationException($"读取章节失败: {storyPath}");
     }
 
-    private DialogsViewBuilder.ResourceProvider CreateDialogsResourceProvider()
+    private DialogControlBuilder.ResourceProvider CreateDialogsResourceProvider()
     {
         return new DignReaderDialogsResourceProvider(this);
     }
 
-    private sealed class DignReaderDialogsResourceProvider(DignReader owner) : DialogsViewBuilder.ResourceProvider
+    private sealed class DignReaderDialogsResourceProvider(DignReader owner) : DialogControlBuilder.ResourceProvider
     {
         public Bitmap? LoadImage(string uuid)
         {
@@ -187,18 +184,6 @@ public partial class DignReader : Window
         {
             return owner.OpenMediaAsync(owner.GetContentFilePath($"Video/{videoUuid}.mp4"), "视频播放");
         }
-    }
-
-    private void AddDialogsToUICollection(Controls collection, BasicStoryModel story, bool isOffscreen)
-    {
-        var storyModel = LoadStoryModel(GetContentFilePath($"Story/{story.Seq}.json"));
-        var builder = new DialogsViewBuilder(
-            dialogsResourceProvider,
-            story,
-            storyModel.Dialogs,
-            isOffscreen ? offscreenRenderOptions : interactiveRenderOptions);
-
-        builder.AddTo(collection);
     }
 
     private async Task OpenMediaAsync(string path, string title)
@@ -251,7 +236,15 @@ public partial class DignReader : Window
         }
 
         CurrentStoryText.Text = selected.DisplayName;
-        AddDialogsToUICollection(DialogStackPanel.Children, selected, isOffscreen: false);
+        var storyModel = LoadStoryModel(GetContentFilePath($"Story/{selected.Seq}.json"));
+        var viewBuilder = new DialogControlBuilder(
+            dialogsResourceProvider,
+            interactiveRenderOptions);
+        foreach (var dialog in storyModel.Dialogs)
+        {
+            var dialogControl = viewBuilder.RenderDialog(dialog);
+            DialogStackPanel.Children.Add(dialogControl);
+        }
         DialogScrollViewer.Offset = new Vector(0, 0);
     }
 
@@ -359,10 +352,8 @@ public partial class DignReader : Window
         try
         {
             ExportAsPNG.IsEnabled = false;
+            exportProgressModel.SetProgress(0, collectionModel.Stories.Count);
             ExportProgressArea.IsVisible = true;
-
-            var total = collectionModel.Stories?.Count ?? collectionModel.StoryCount;
-            exportProgressModel.SetProgress(0, total);
 
             if (File.Exists(path))
             {
@@ -370,19 +361,16 @@ public partial class DignReader : Window
             }
 
             using var pngPack = ZipFile.Open(path, ZipArchiveMode.Create);
-            var stories = collectionModel.Stories ?? [];
-            for (var i = 0; i < stories.Count; i++)
-            {
-                var story = stories[i];
-                var exportControl = BuildStoryExportControl(story, i + 1);
-                var pngBytes = RenderControlToPng(exportControl, 2.0);
-
-                using var targetStream = pngPack.CreateEntry($"{story.Seq}.png").Open();
-                await targetStream.WriteAsync(pngBytes, 0, pngBytes.Length);
-
-                exportProgressModel.SetProgress(i + 1, total);
-                await Task.Yield();
-            }
+            var exporter = new ImageExporter(
+                collectionModel,
+                dialogsResourceProvider,
+                seq => LoadStoryModel(GetContentFilePath($"Story/{seq}.json")));
+            // We use InvokeAsync to ensure the progress UI gets a chance to update between exports,
+            // as the ExportAsync method may take a long time to complete and would otherwise block the UI thread.
+            await exporter.ExportAsync(
+                pngPack,
+                async (current, total) => await Dispatcher.UIThread.InvokeAsync(() => exportProgressModel.SetProgress(current, total))
+            );
 
             await MessageBoxManager.GetMessageBoxStandard("导出", "导出完成", ButtonEnum.Ok).ShowWindowDialogAsync(this);
         }
@@ -395,55 +383,5 @@ public partial class DignReader : Window
             ExportAsPNG.IsEnabled = true;
             ExportProgressArea.IsVisible = false;
         }
-    }
-
-    private Control BuildStoryExportControl(BasicStoryModel story, int seq)
-    {
-        var panel = new StackPanel
-        {
-            Width = 340,
-            Spacing = 8
-        };
-        var root = new Border
-        {
-            Background = Brushes.White,
-            Padding = new Thickness(12),
-            Child = panel
-        };
-        root.Styles.Add(new SimpleTheme());
-        panel.Children.Add(new TextBlock
-        {
-            Text = $"第 {seq} 话",
-            FontSize = 22,
-            FontWeight = FontWeight.Bold,
-            HorizontalAlignment = HorizontalAlignment.Center
-        });
-
-        panel.Children.Add(new TextBlock
-        {
-            Text = $"《{collectionModel.Name}》",
-            FontSize = 13,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 6)
-        });
-
-        AddDialogsToUICollection(panel.Children, story, isOffscreen: true);
-        return root;
-    }
-
-    private static byte[] RenderControlToPng(Control control, double scale)
-    {
-        control.Measure(Size.Infinity);
-        control.Arrange(new Rect(control.DesiredSize));
-
-        var pixelWidth = Math.Max(1, (int)Math.Ceiling(control.Bounds.Width * scale));
-        var pixelHeight = Math.Max(1, (int)Math.Ceiling(control.Bounds.Height * scale));
-
-        using var bitmap = new RenderTargetBitmap(new PixelSize(pixelWidth, pixelHeight), new Vector(96 * scale, 96 * scale));
-        bitmap.Render(control);
-
-        using var stream = new MemoryStream();
-        bitmap.Save(stream);
-        return stream.ToArray();
     }
 }
