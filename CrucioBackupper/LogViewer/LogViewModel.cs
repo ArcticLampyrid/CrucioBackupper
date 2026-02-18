@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
+using Avalonia.Threading;
 
 namespace CrucioBackupper.LogViewer
 {
@@ -16,22 +9,24 @@ namespace CrucioBackupper.LogViewer
 
         public virtual void Add(LogEntity entity)
         {
-            if (Application.Current is null || Application.Current.Dispatcher is null)
+            if (!Dispatcher.UIThread.CheckAccess())
             {
-                Entities.Add(entity);
+                Dispatcher.UIThread.Post(() => Entities.Add(entity), DispatcherPriority.Background);
                 return;
             }
-            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, () => Entities.Add(entity));
+
+            Entities.Add(entity);
         }
 
         public virtual void Clear()
         {
-            if (Application.Current is null || Application.Current.Dispatcher is null)
+            if (!Dispatcher.UIThread.CheckAccess())
             {
-                Entities.Clear();
+                Dispatcher.UIThread.Post(() => Entities.Clear(), DispatcherPriority.Background);
                 return;
             }
-            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, () => Entities.Clear());
+
+            Entities.Clear();
         }
     }
 }

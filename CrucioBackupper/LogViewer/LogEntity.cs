@@ -13,6 +13,7 @@ namespace CrucioBackupper.LogViewer
         public required LogEventLevel Level { get; init; }
         public required string Message { get; init; }
         public Exception? Exception { get; init; }
+        public string ExceptionMessage => Exception?.Message ?? string.Empty;
         public bool HasException => Exception != null;
     }
 }

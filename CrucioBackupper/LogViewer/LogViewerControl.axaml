@@ -1,0 +1,50 @@
+<UserControl
+    x:Class="CrucioBackupper.LogViewer.LogViewerControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:logviewer="using:CrucioBackupper.LogViewer">
+    <UserControl.Resources>
+        <logviewer:LogEventLevelToBrushConverter x:Key="LogEventLevelToBrushConverter" />
+    </UserControl.Resources>
+    <Grid RowDefinitions="*,Auto">
+        <ListBox
+            Grid.Row="0"
+            x:Name="LogListBox"
+            ItemsSource="{Binding Entities}"
+            DoubleTapped="LogListBox_DoubleTapped">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="2" Margin="0,1,0,1">
+                        <TextBlock
+                            Text="{Binding Timestamp, StringFormat='{}{0:s}'}"
+                            Foreground="{Binding Level, Converter={StaticResource LogEventLevelToBrushConverter}}"
+                            MinWidth="126" />
+                        <TextBlock
+                            Text="{Binding Level}"
+                            FontWeight="Bold"
+                            Foreground="{Binding Level, Converter={StaticResource LogEventLevelToBrushConverter}}" />
+                        <TextBlock
+                            Text=":"
+                            FontWeight="Bold"
+                            Foreground="{Binding Level, Converter={StaticResource LogEventLevelToBrushConverter}}" />
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock
+                                Text="{Binding Message}"
+                                Foreground="{Binding Level, Converter={StaticResource LogEventLevelToBrushConverter}}" />
+                            <TextBlock
+                                Text="{Binding ExceptionMessage}"
+                                Foreground="{Binding Level, Converter={StaticResource LogEventLevelToBrushConverter}}"
+                                IsVisible="{Binding HasException}" />
+                        </StackPanel>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <CheckBox
+            Grid.Row="1"
+            x:Name="CanAutoScroll"
+            Margin="0,6,0,0"
+            Content="自动滚动日志"
+            IsChecked="True" />
+    </Grid>
+</UserControl>

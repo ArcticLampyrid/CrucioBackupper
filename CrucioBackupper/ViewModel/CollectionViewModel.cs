@@ -1,4 +1,4 @@
-﻿using CrucioNetwork;
+using CrucioNetwork;
 using CrucioNetwork.Model;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace CrucioBackupper.ViewModel
         public string LikeCountDesc => GetNumberDesc(LikeCount);
         public bool IsVideo { get; set; } = false;
         public string ShareUuid { get; set; } = string.Empty;
+        public string ShareUuidDisplay => IsVideo ? $"KV号：{ShareUuid}" : $"KN号：{ShareUuid}";
         public string Author { get; set; } = string.Empty;
 
         private static string GetNumberDesc(long x) => x switch

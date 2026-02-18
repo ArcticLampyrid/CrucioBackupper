@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "name": "C#: CrucioBackupper Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/CrucioBackupper/CrucioBackupper.csproj"
+        }
+    ]
+}

@@ -1,14 +1,14 @@
-﻿using Serilog.Events;
+using Serilog.Events;
 using System;
 using System.Globalization;
-using System.Windows.Data;
-using System.Windows.Media;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 
 namespace CrucioBackupper.LogViewer
 {
     public class LogEventLevelToBrushConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is LogEventLevel level)
             {
@@ -27,7 +27,7 @@ namespace CrucioBackupper.LogViewer
             return Brushes.Black;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

@@ -1,0 +1,130 @@
+<Window
+x:Class="CrucioBackupper.MainWindow"
+xmlns="https://github.com/avaloniaui"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
+xmlns:logviewer="using:CrucioBackupper.LogViewer"
+Width="800"
+Height="500"
+Title="快点阅读文章备份器"
+DragDrop.AllowDrop="True"
+DragDrop.DragOver="Window_DragOver"
+DragDrop.Drop="Window_Drop">
+    <Window.Styles>
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="#1E5AA8" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+    </Window.Styles>
+    <DockPanel Margin="6">
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Margin="0,0,4,0" Text="搜索内容：" />
+            <Button DockPanel.Dock="Right" x:Name="SearchButton" MinWidth="68" Click="SearchButton_Click" Content="搜索" IsDefault="{Binding IsFocused, ElementName=SearchContentTextBox}" />
+            <TextBox x:Name="SearchContentTextBox" VerticalContentAlignment="Center" Watermark="作品名称/KN号" />
+        </DockPanel>
+
+        <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="#E0E0E0" Padding="0,6,0,0">
+            <StackPanel Spacing="1">
+                <TextBlock TextWrapping="Wrap" Text="请注意：" />
+                <TextBlock TextWrapping="Wrap" Text="本工具仅用于学习交流使用，作者不对使用本软件可能引起的任何后果（如侵权）承担任何责任" />
+                <TextBlock TextWrapping="Wrap" Text="本工具仅用于想要退出快点的作家备份自己的文章" />
+                <TextBlock TextWrapping="Wrap" Text="请您确保您对保存的文章拥有版权" />
+                <TextBlock TextWrapping="Wrap" Text="友情提醒：签约作者的作品，其版权可能在平台手中，具体请参考您的合约" />
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <TextBlock VerticalAlignment="Center" Text="当前版本：" />
+                    <Button x:Name="VersionTextBlock" Classes="link" Click="OpenReleasePageButton_Click" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <TextBlock VerticalAlignment="Center" Text="本工具完全开源，主页地址：" />
+                    <Button Classes="link" Click="OpenHomePageButton_Click" Content="https://github.com/ArcticLampyrid/CrucioBackupper" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="登陆帐号" />
+            <Grid Grid.Row="0" Grid.Column="1" x:Name="LoginView">
+                <DockPanel x:Name="LoggedOutPanel">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button Margin="5,0,0,0" x:Name="LoginViaTokenButton" Click="LoginViaTokenButton_Click" Content="使用 Token 登陆（高级）" />
+                        <Button Margin="5,0,0,0" x:Name="SsoQr" Click="SsoQr_Click" Content="扫码登录" />
+                    </StackPanel>
+                    <TextBlock VerticalAlignment="Center" Text="未登陆（注意：VIP文章需要提供能够解锁相应章节的帐号）" />
+                </DockPanel>
+
+                <DockPanel x:Name="LoggedInPanel" IsVisible="False">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+                        <Button Margin="5,0,0,0" Classes="link" x:Name="CopyTokenButton" Click="CopyTokenButton_Click" Content="复制 Token" />
+                        <Button Margin="5,0,0,0" x:Name="LogoutButton" Click="LogoutButton_Click" Content="注销" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <Image x:Name="LoggedInAvatar" Width="18" Height="18" VerticalAlignment="Center" Stretch="UniformToFill" />
+                        <TextBlock x:Name="LoggedInNameText" VerticalAlignment="Center" />
+                        <TextBlock x:Name="VipTagText" VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+            </Grid>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="文章Uuid" />
+            <DockPanel Grid.Row="1" Grid.Column="1">
+                <Button DockPanel.Dock="Right" Margin="5,0,0,0" x:Name="DownloadButton" Click="DownloadButton_Click" Content="下载" IsDefault="{Binding IsFocused, ElementName=CollectionUuidTextBox}"/>
+                <TextBox x:Name="CollectionUuidTextBox" VerticalContentAlignment="Center" Watermark="文章内部唯一编号，非KN号" />
+            </DockPanel>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="其他操作" />
+            <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Margin="5,0,0,0" x:Name="ReadBackupButton" Click="ReadBackupButton_Click" Content="查看备份" />
+            </StackPanel>
+        </Grid>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <ListBox Grid.Row="0" x:Name="SearchResultListView" SelectionChanged="SearchResultListView_SelectionChanged">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image asyncImageLoader:ImageLoader.Source="{Binding CoverUrl}" Width="100" Height="132" VerticalAlignment="Top" />
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Margin="4,2,0,0" Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock Margin="5,2" Text="{Binding ShareUuidDisplay}" Foreground="Black" />
+                                    </Border>
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock Margin="5,2" Text="{Binding ClickCountDesc, StringFormat='点击数：{0}'}" Foreground="Black" />
+                                    </Border>
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock Margin="5,2" Text="{Binding LikeCountDesc, StringFormat='点赞量：{0}'}" Foreground="Black" />
+                                    </Border>
+                                    <Border Background="LightGray" CornerRadius="5" VerticalAlignment="Center" Margin="5">
+                                        <TextBlock Margin="5,2" Text="{Binding Author, StringFormat='作者：{0}'}" Foreground="Black" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Margin="4,2,0,0" Text="{Binding Desc}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <logviewer:LogViewerControl Grid.Row="1" x:Name="LogViewer" />
+        </Grid>
+    </DockPanel>
+</Window>

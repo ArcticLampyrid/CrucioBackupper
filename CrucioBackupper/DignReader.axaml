@@ -1,0 +1,66 @@
+<Window
+x:Class="CrucioBackupper.DignReader"
+xmlns="https://github.com/avaloniaui"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+Title="DignReader"
+Width="800"
+Height="450"
+MinWidth="700"
+MinHeight="420"
+Closed="Window_Closed">
+    <DockPanel Margin="6">
+        <TabControl DockPanel.Dock="Left" TabStripPlacement="Bottom" Width="224" SelectedIndex="1">
+            <TabItem Header="简介">
+                <ScrollViewer>
+                    <StackPanel Orientation="Vertical">
+                        <Image x:Name="CollectionCoverImage" Stretch="Uniform" />
+                        <TextBlock x:Name="CollectionNameText" FontWeight="Bold" Margin="4,0,4,0" />
+                        <TextBlock x:Name="CollectionMetaText" HorizontalAlignment="Right"
+                                   Margin="4,0,4,0" />
+                        <Border Height="0.5" HorizontalAlignment="Stretch" Background="{Binding Foreground, ElementName=CollectionMetaText}" Margin="4,0,4,0"  />
+                        <TextBlock x:Name="CollectionDescText" TextWrapping="Wrap" Margin="4,0,4,0" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="目录">
+                <ListBox x:Name="CatalogListView"
+                         SelectionChanged="CatalogListView_SelectionChanged"
+                         DisplayMemberBinding="{Binding DisplayName}" />
+            </TabItem>
+            <TabItem Header="导出">
+                <StackPanel Orientation="Vertical">
+                    <Button Content="导出 TXT" Click="ExportAsTXT_Click" Margin="0,4,0,4" />
+                    <Button Content="导出 PNG" Click="ExportAsPNG_Click" x:Name="ExportAsPNG"
+                            Margin="0,4,0,4" />
+                    <StackPanel Orientation="Vertical" x:Name="ExportProgressArea" IsVisible="False">
+                        <TextBlock Text="{Binding Progress, StringFormat='当前进度：{0:P0}'}" />
+                        <ProgressBar x:Name="ExportProgressBar" Height="20" Minimum="0"
+                                     Maximum="{Binding Total}" Value="{Binding Current}" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+        <DockPanel DockPanel.Dock="Top" Margin="8,0,0,4">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="缩放：" Margin="0,0,2,0" />
+                <Slider x:Name="ZoomSlider" Width="100" VerticalAlignment="Center" Minimum="0.5"
+                        Maximum="5.0" LargeChange="0.25" SmallChange="0.1" Value="2.0" />
+                <TextBlock VerticalAlignment="Center" Margin="4,0,0,0"
+                           Text="{Binding ElementName=ZoomSlider, Path=Value, StringFormat='{}{0:P0}'}" />
+            </StackPanel>
+            <TextBlock x:Name="CurrentStoryText" VerticalAlignment="Center" FontWeight="Bold" />
+        </DockPanel>
+
+        <ScrollViewer x:Name="DialogScrollViewer"
+                      PointerWheelChanged="DialogScrollViewer_PointerWheelChanged">
+            <LayoutTransformControl>
+                <LayoutTransformControl.LayoutTransform>
+                    <ScaleTransform ScaleX="{Binding ElementName=ZoomSlider, Path=Value}"
+                                    ScaleY="{Binding ElementName=ZoomSlider, Path=Value}" />
+                </LayoutTransformControl.LayoutTransform>
+                <StackPanel Orientation="Vertical" x:Name="DialogStackPanel" />
+            </LayoutTransformControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

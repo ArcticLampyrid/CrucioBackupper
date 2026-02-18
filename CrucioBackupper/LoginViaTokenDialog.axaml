@@ -1,0 +1,27 @@
+<Window
+    x:Class="CrucioBackupper.LoginViaTokenDialog"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="384"
+    Height="90"
+    MinWidth="384"
+    MinHeight="90"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+    Title="使用 Token 登陆（高级）">
+    <DockPanel Margin="6">
+        <Button
+            x:Name="LoginButton"
+            DockPanel.Dock="Bottom"
+            HorizontalAlignment="Right"
+            Padding="10,5"
+            IsDefault="True"
+            Content="登陆"
+            Click="LoginButton_Click" />
+        <TextBox
+            x:Name="TokenTextBox"
+            Watermark="快点登陆 Token 凭证"
+            TextWrapping="Wrap"
+            VerticalContentAlignment="Center" />
+    </DockPanel>
+</Window>

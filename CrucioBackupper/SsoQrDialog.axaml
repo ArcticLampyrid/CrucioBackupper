@@ -1,0 +1,21 @@
+<Window
+    x:Class="CrucioBackupper.SsoQrDialog"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="320"
+    Height="320"
+    MinWidth="320"
+    MinHeight="320"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+    Title="扫码登录">
+    <Grid RowDefinitions="*,Auto">
+        <Image Grid.Row="0" x:Name="QrImage" Stretch="Uniform" />
+        <TextBlock
+            Grid.Row="1"
+            Margin="6"
+            TextWrapping="Wrap"
+            TextAlignment="Center"
+            Text="请使用快点阅读App（移动端）进行扫码登录&#x0A;扫描入口：我的 → 右上角设置 → 扫一扫" />
+    </Grid>
+</Window>

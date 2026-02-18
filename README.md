@@ -2,10 +2,19 @@
 [快点阅读](https://www.kuaidianyuedu.com/)文章备份器  
 用于想要退出快点的作家备份自己的文章  
 
-## 如何打开
-1. 请确保您正在使用电脑打开，最低系统版本要求：Windows 7 x64 
-2. 请解压 `CrucioBackupper-vx.y.z-win-x64.7z` 文件并双击打开其中的 `CrucioBackupper.exe`  
-   **请务必解压后打开，在压缩包内直接打开极易导致运行错误**
+## 运行环境
+- 本项目已迁移到 **Avalonia UI**，支持 Windows / Linux / macOS
+- 推荐使用 .NET 8 SDK
+
+### 启动方式
+```bash
+dotnet run --project CrucioBackupper/CrucioBackupper.csproj
+```
+
+### 发布
+```bash
+dotnet publish CrucioBackupper/CrucioBackupper.csproj -c Release
+```
 
 ## 如何使用
 1. 首先打开软件，搜索需要备份的文章并选中：  
