@@ -2,8 +2,10 @@
 Version=1.0
 Type=Application
 Name=CrucioBackupper
+Name[zh_CN]=快点阅读文章备份器
 Comment=CrucioReader backup tool
-Exec=cruciobackupper
+Comment[zh_CN]=快点阅读文章备份器
+Exec=crucio-backupper
 Terminal=false
 Categories=Utility;
 StartupNotify=true

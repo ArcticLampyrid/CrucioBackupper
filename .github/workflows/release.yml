@@ -87,12 +87,12 @@ jobs:
 
       - name: Prepare Linux package root
         run: |
-          mkdir -p artifacts/pkgroot/opt/cruciobackupper
+          mkdir -p artifacts/pkgroot/opt/crucio-backupper
           mkdir -p artifacts/pkgroot/usr/bin
           mkdir -p artifacts/pkgroot/usr/share/applications
-          cp -R artifacts/linux-framework-dependent/. artifacts/pkgroot/opt/cruciobackupper/
-          cp deploy/cruciobackupper.desktop artifacts/pkgroot/usr/share/applications/cruciobackupper.desktop
-          ln -s /opt/cruciobackupper/CrucioBackupper artifacts/pkgroot/usr/bin/cruciobackupper
+          cp -R artifacts/linux-framework-dependent/. artifacts/pkgroot/opt/crucio-backupper/
+          cp deploy/crucio-backupper.desktop artifacts/pkgroot/usr/share/applications/crucio-backupper.desktop
+          ln -s /opt/crucio-backupper/CrucioBackupper artifacts/pkgroot/usr/bin/crucio-backupper
 
       - name: Install packaging tools
         run: |
@@ -103,7 +103,7 @@ jobs:
       - name: Build DEB package
         run: |
           fpm -s dir -t deb -C artifacts/pkgroot \
-            -n cruciobackupper \
+            -n crucio-backupper \
             -v "${{ steps.version_meta.outputs.version }}" \
             --iteration 1 \
             -a amd64 \
@@ -119,7 +119,7 @@ jobs:
       - name: Build RPM package
         run: |
           fpm -s dir -t rpm -C artifacts/pkgroot \
-            -n cruciobackupper \
+            -n crucio-backupper \
             -v "${{ steps.version_meta.outputs.version }}" \
             --iteration 1 \
             -a x86_64 \
@@ -135,7 +135,7 @@ jobs:
       - name: Build Arch package
         run: |
           fpm -s dir -t pacman -C artifacts/pkgroot \
-            -n cruciobackupper \
+            -n crucio-backupper \
             -v "${{ steps.version_meta.outputs.version }}" \
             --iteration 1 \
             -a x86_64 \
