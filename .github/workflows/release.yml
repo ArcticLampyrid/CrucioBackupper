@@ -1,0 +1,169 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*"
+
+env:
+  APP_NAME: CrucioBackupper
+  PROJECT_PATH: CrucioBackupper/CrucioBackupper.csproj
+  DOTNET_VERSION: 8.0.x
+
+jobs:
+  build-windows:
+    name: Build Windows Artifacts
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore CrucioBackupper.sln
+
+      - name: Compute version metadata
+        id: version_meta
+        shell: pwsh
+        run: |
+          $version = (dotnet msbuild $env:PROJECT_PATH -nologo -getProperty:Version).Trim()
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Publish Windows self-contained
+        shell: pwsh
+        run: dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained true -o artifacts/win-self-contained
+
+      - name: Publish Windows framework-dependent
+        shell: pwsh
+        run: dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained false -p:UseAppHost=true -o artifacts/win-framework-dependent
+
+      - name: Archive Windows outputs
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "artifacts/win-self-contained/*" -DestinationPath "artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-self-contained.zip" -Force
+          Compress-Archive -Path "artifacts/win-framework-dependent/*" -DestinationPath "artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-framework-dependent.zip" -Force
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-assets
+          path: |
+            artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-self-contained.zip
+            artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-framework-dependent.zip
+          if-no-files-found: error
+
+  build-linux-packages:
+    name: Build Linux DEB/RPM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore CrucioBackupper.sln
+
+      - name: Compute version metadata
+        id: version_meta
+        shell: pwsh
+        run: |
+          $version = (dotnet msbuild $env:PROJECT_PATH -nologo -getProperty:Version).Trim()
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Publish Linux framework-dependent
+        run: dotnet publish "$PROJECT_PATH" -c Release -r linux-x64 --self-contained false -p:UseAppHost=true -o artifacts/linux-framework-dependent
+
+      - name: Prepare Linux package root
+        run: |
+          mkdir -p artifacts/pkgroot/opt/cruciobackupper
+          mkdir -p artifacts/pkgroot/usr/bin
+          cp -R artifacts/linux-framework-dependent/. artifacts/pkgroot/opt/cruciobackupper/
+          ln -s /opt/cruciobackupper/CrucioBackupper artifacts/pkgroot/usr/bin/cruciobackupper
+
+      - name: Install fpm
+        run: sudo gem install --no-document fpm
+
+      - name: Build DEB package
+        run: |
+          fpm -s dir -t deb -C artifacts/pkgroot \
+            -n cruciobackupper \
+            -v "${{ steps.version_meta.outputs.version }}" \
+            --iteration 1 \
+            -a amd64 \
+            --license MIT \
+            --url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --maintainer "CrucioBackupper maintainers" \
+            --description "CrucioReader backup tool" \
+            --depends "dotnet-runtime-8.0" \
+            --depends "vlc | libvlc5" \
+            -p "artifacts/${APP_NAME}-${{ steps.version_meta.outputs.version }}-linux-x64.deb" \
+            .
+
+      - name: Build RPM package
+        run: |
+          fpm -s dir -t rpm -C artifacts/pkgroot \
+            -n cruciobackupper \
+            -v "${{ steps.version_meta.outputs.version }}" \
+            --iteration 1 \
+            -a x86_64 \
+            --license MIT \
+            --url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --maintainer "CrucioBackupper maintainers" \
+            --description "CrucioReader backup tool" \
+            --depends "dotnet-runtime-8.0" \
+            --depends "vlc" \
+            -p "artifacts/${APP_NAME}-${{ steps.version_meta.outputs.version }}-linux-x64.rpm" \
+            .
+
+      - name: Upload Linux packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release-assets
+          path: |
+            artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-linux-x64.deb
+            artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-linux-x64.rpm
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - build-windows
+      - build-linux-packages
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-release-assets"
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate checksums
+        run: |
+          cd release-assets
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          files: |
+            release-assets/*
