@@ -134,30 +134,24 @@ public sealed class DialogControlBuilder
     private Control CreateTextMessageControl(DialogModel dialog)
     {
         var text = dialog.Text ?? string.Empty;
-        // for offscreen rendering, we can use TextBlock
-        if (renderOptions.IsOffscreen)
+        var control = new TextBlock
         {
-            return new TextBlock
-            {
-                Text = text,
-                TextWrapping = TextWrapping.Wrap,
-                Foreground = Brushes.Black,
-                Background = Brushes.Transparent,
-                Padding = new Thickness(5)
-            };
-        }
-
-        return new TextBox
-        {
-            IsReadOnly = true,
             Text = text,
             TextWrapping = TextWrapping.Wrap,
-            AcceptsReturn = true,
             Foreground = Brushes.Black,
             Background = Brushes.Transparent,
-            BorderThickness = new Thickness(0),
             Padding = new Thickness(5)
         };
+        control.ContextMenu = CreateContextMenu(
+            "复制",
+            async () =>
+            {
+                if (TopLevel.GetTopLevel(control)?.Clipboard is { } clipboard)
+                {
+                    await clipboard.SetTextAsync(text);
+                }
+            });
+        return control;
     }
 
     private Control CreateImageMessageControl(DialogModel dialog)
