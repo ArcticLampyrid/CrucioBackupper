@@ -1,16 +1,12 @@
-﻿using CrucioNetwork;
+using CrucioNetwork;
 using CrucioNetwork.Model;
 using CrucioBackupper.Model;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -135,7 +131,7 @@ namespace CrucioBackupper
                 .ToList();
             string? coverUuid = null;
             var storiesDetail = stories.Select(x => api.GetStoryDetail(x.Uuid)).ToList();
-            var dealogInfos = stories.Select(x => api.GetAllDialog(x)).ToList();
+            var dialogInfos = stories.Select(x => api.GetAllDialog(x)).ToList();
             for (int i = 0; i < stories.Count; i++)
             {
                 StoryBrief storyBrief = stories[i];
@@ -143,7 +139,7 @@ namespace CrucioBackupper
                 try
                 {
                     var storyDetail = await storiesDetail[i];
-                    var dialogInfo = await dealogInfos[i];
+                    var dialogInfo = await dialogInfos[i];
                     storyDetail.MakeSureNoError();
                     dialogInfo.MakeSureNoError();
 
