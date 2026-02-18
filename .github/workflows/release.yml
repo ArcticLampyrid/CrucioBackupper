@@ -45,12 +45,27 @@ jobs:
         run: |
           Compress-Archive -Path "artifacts/win-self-contained/*" -DestinationPath "artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-self-contained.zip" -Force
 
+      - name: Install NSIS
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -UserAgent "Wget" https://sourceforge.net/projects/nsis/files/NSIS%203/3.11/nsis-3.11-setup.exe/download -OutFile ${{ runner.temp }}\nsis-3.11-setup.exe
+          & "${{ runner.temp }}\nsis-3.11-setup.exe" /S
+          Add-Content -Path $env:GITHUB_PATH -Value "C:\Program Files (x86)\NSIS"
+
+      - name: Package Windows installer
+        shell: pwsh
+        run: |
+          cd deploy/win-x64-installer
+          & "makensis" nsis.nsi
+          Move-Item -Path ./CrucioBackupperInstaller.exe -Destination "../../artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-installer.exe"
+
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-release-assets
           path: |
             artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-self-contained.zip
+            artifacts/${{ env.APP_NAME }}-${{ steps.version_meta.outputs.version }}-win-x64-installer.exe
           if-no-files-found: error
 
   build-linux-packages:
