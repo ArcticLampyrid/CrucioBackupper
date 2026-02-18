@@ -1,29 +1,28 @@
 using Avalonia.Media.Imaging;
+using BernhardHaus.Collections.WeakDictionary;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace CrucioBackupper;
 
 public sealed class LocalFileImageLoader : IDisposable
 {
-    private readonly Dictionary<string, Bitmap?> cache = new(StringComparer.Ordinal);
+    private readonly WeakDictionary<string, Bitmap> cache = [];
 
     public Bitmap? Load(string path)
     {
-        if (cache.TryGetValue(path, out var cached))
-        {
-            return cached;
-        }
-
         if (!File.Exists(path))
         {
-            cache[path] = null;
             return null;
         }
 
+        if (cache.TryGetValue(path, out var bitmap) && bitmap is not null)
+        {
+            return bitmap;
+        }
+
         using var stream = File.OpenRead(path);
-        var bitmap = new Bitmap(stream);
+        bitmap = new Bitmap(stream);
         cache[path] = bitmap;
         return bitmap;
     }
