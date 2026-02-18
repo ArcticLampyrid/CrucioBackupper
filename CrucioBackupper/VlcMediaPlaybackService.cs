@@ -156,8 +156,9 @@ internal sealed class VlcMediaPlaybackService : IDisposable
                     player.Stop();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceWarning("Failed to stop VLC player during dispose: {0}", ex.Message);
             }
 
             media.Dispose();
