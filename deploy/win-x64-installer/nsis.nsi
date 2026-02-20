@@ -16,6 +16,8 @@ InstallDirRegKey HKLM "Software\${NAME}" "InstallFolder"
 RequestExecutionLevel Admin
 
 !define MUI_ABORTWARNING
+!define MUI_FINISHPAGE_RUN "$INSTDIR\CrucioBackupper.exe"
+!define MUI_FINISHPAGE_RUN_TEXT "Launch ${NAME} instantly"
 
 !define MUI_LANGDLL_REGISTRY_ROOT "HKLM" 
 !define MUI_LANGDLL_REGISTRY_KEY "Software\${NAME}" 
