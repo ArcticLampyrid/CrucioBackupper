@@ -31,6 +31,7 @@ public partial class DignReader : Window
     private readonly HashSet<string> extractedFiles = [];
     private readonly LocalFileImageLoader imageLoader = new();
     private readonly VlcMediaPlaybackService mediaPlaybackService = new();
+    private readonly ImageExportOptionsViewModel imageExportOptionsViewModel;
 
     private static readonly JsonSerializerOptions serializerOptions = new()
     {
@@ -54,6 +55,8 @@ public partial class DignReader : Window
             }
 
             InitializeComponent();
+            imageExportOptionsViewModel = new ImageExportOptionsViewModel();
+            ImageExportAdvancedPanel.DataContext = imageExportOptionsViewModel;
 
             do
             {
@@ -316,11 +319,17 @@ public partial class DignReader : Window
         await MessageBoxManager.GetMessageBoxStandard("导出", "导出完成", ButtonEnum.Ok).ShowWindowDialogAsync(this);
     }
 
-    private async void ExportAsPNG_Click(object? sender, RoutedEventArgs e)
+    private async void ExportAsImage_Click(object? sender, RoutedEventArgs e)
     {
+        if (!imageExportOptionsViewModel.TryGetValidatedOptions(out var exportOptions, out var invalidReason))
+        {
+            await MessageBoxManager.GetMessageBoxStandard("导出", $"图片导出参数无效：{invalidReason}", ButtonEnum.Ok).ShowWindowDialogAsync(this);
+            return;
+        }
+
         var shouldContinue = await MessageBoxManager.GetMessageBoxStandard(
             "导出",
-            "请注意，PNG 格式无法逆向转换为文本格式或 *.dign 格式。\n是否继续？",
+            "请注意，导出的图片无法逆向转换为文本格式或 *.dign 格式。\n是否继续？",
             ButtonEnum.YesNo).ShowWindowDialogAsync(this) == ButtonResult.Yes;
 
         if (!shouldContinue)
@@ -328,9 +337,9 @@ public partial class DignReader : Window
             return;
         }
 
-        var pngFile = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var imageFile = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "导出 PNG（ZIP）",
+            Title = "导出图片（ZIP）",
             SuggestedFileName = $"{collectionModel.Name}.zip",
             FileTypeChoices =
             [
@@ -342,7 +351,7 @@ public partial class DignReader : Window
             DefaultExtension = ".zip"
         });
 
-        var path = pngFile?.TryGetLocalPath();
+        var path = imageFile?.TryGetLocalPath();
 
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -351,7 +360,9 @@ public partial class DignReader : Window
 
         try
         {
-            ExportAsPNG.IsEnabled = false;
+            ExportAsImage.IsEnabled = false;
+            ImageExportAdvancedToggleButton.IsEnabled = false;
+            ImageExportAdvancedPanel.IsEnabled = false;
             exportProgressModel.SetProgress(0, collectionModel.Stories.Count);
             ExportProgressArea.IsVisible = true;
 
@@ -360,15 +371,18 @@ public partial class DignReader : Window
                 File.Delete(path);
             }
 
-            using var pngPack = ZipFile.Open(path, ZipArchiveMode.Create);
+            using var imagePack = ZipFile.Open(path, ZipArchiveMode.Create);
             var exporter = new ImageExporter(
                 collectionModel,
                 dialogsResourceProvider,
-                seq => LoadStoryModel(GetContentFilePath($"Story/{seq}.json")));
+                seq => LoadStoryModel(GetContentFilePath($"Story/{seq}.json")),
+                exportOptions.Scale,
+                exportOptions.LogicalWidth,
+                exportOptions.Format);
             // We use InvokeAsync to ensure the progress UI gets a chance to update between exports,
             // as the ExportAsync method may take a long time to complete and would otherwise block the UI thread.
             await exporter.ExportAsync(
-                pngPack,
+                imagePack,
                 async (current, total) => await Dispatcher.UIThread.InvokeAsync(() => exportProgressModel.SetProgress(current, total))
             );
 
@@ -380,8 +394,15 @@ public partial class DignReader : Window
         }
         finally
         {
-            ExportAsPNG.IsEnabled = true;
+            ExportAsImage.IsEnabled = true;
+            ImageExportAdvancedToggleButton.IsEnabled = true;
+            ImageExportAdvancedPanel.IsEnabled = true;
             ExportProgressArea.IsVisible = false;
         }
+    }
+
+    private void ToggleImageExportAdvancedPanel_Click(object? sender, RoutedEventArgs e)
+    {
+        ImageExportAdvancedPanel.IsVisible = !ImageExportAdvancedPanel.IsVisible;
     }
 }

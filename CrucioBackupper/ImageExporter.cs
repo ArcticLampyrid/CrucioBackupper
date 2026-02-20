@@ -15,13 +15,13 @@ namespace CrucioBackupper;
 
 public sealed class ImageExporter
 {
-    private const int StoryContentWidth = 240;
+    public const int DefaultLogicalWidth = 240;
     private const int StoryPadding = 0;
     private const int DialogSpacing = 0;
     private const int StoryHeaderSpacing = 4;
     private const int CollectionNameSpacing = 12;
     private const int BytesPerPixel = 4;
-    private const double DefaultScale = 4.0;
+    public const double DefaultScale = 4.0;
 
     private static readonly DialogControlBuilder.RenderOptions offscreenRenderOptions = new() { IsOffscreen = true };
 
@@ -29,17 +29,23 @@ public sealed class ImageExporter
     private readonly Func<int, StoryModel> storyLoader;
     private readonly DialogControlBuilder viewBuilder;
     private readonly double scale;
+    private readonly int logicalWidth;
+    private readonly IImageExportFormat format;
 
     public ImageExporter(
         CollectionModel collectionModel,
         DialogControlBuilder.ResourceProvider resourceProvider,
         Func<int, StoryModel> storyLoader,
-        double scale = DefaultScale)
+        double scale = DefaultScale,
+        int logicalWidth = DefaultLogicalWidth,
+        IImageExportFormat? format = null)
     {
         this.collectionModel = collectionModel ?? throw new ArgumentNullException(nameof(collectionModel));
         this.storyLoader = storyLoader ?? throw new ArgumentNullException(nameof(storyLoader));
         viewBuilder = new DialogControlBuilder(resourceProvider ?? throw new ArgumentNullException(nameof(resourceProvider)), offscreenRenderOptions);
         this.scale = scale > 0 ? scale : throw new ArgumentOutOfRangeException(nameof(scale), "Scale must be greater than 0.");
+        this.logicalWidth = logicalWidth > 0 ? logicalWidth : throw new ArgumentOutOfRangeException(nameof(logicalWidth), "Logical width must be greater than 0.");
+        this.format = format ?? ImageExportFormats.Png;
     }
 
     public async Task ExportAsync(ZipArchive targetArchive, Func<int, int, Task>? reportProgress = null)
@@ -52,12 +58,32 @@ public sealed class ImageExporter
             await reportTask;
         }
 
+        var extension = format.Extension;
+
         for (var i = 0; i < collectionModel.Stories.Count; i++)
         {
             var story = collectionModel.Stories[i];
-            using var storyBitmap = RenderStoryBitmap(story);
-            using var targetStream = targetArchive.CreateEntry($"{story.Seq}.png", CompressionLevel.NoCompression).Open();
-            storyBitmap.Save(targetStream);
+
+            // Due to limitations of RenderTargetBitmap, rendering must be done in the UI thread
+            var slices = RenderStorySlices(story);
+
+            // Compose & encode the image in a background thread
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    using var storyBitmap = ComposeStoryBitmap(slices);
+                    using var targetStream = targetArchive.CreateEntry($"{story.Seq}.{extension}", CompressionLevel.NoCompression).Open();
+                    await format.SaveAsync(storyBitmap, targetStream);
+                }
+                finally
+                {
+                    foreach (var slice in slices)
+                    {
+                        slice.Bitmap.Dispose();
+                    }
+                }
+            });
 
             reportTask = reportProgress?.Invoke(i + 1, collectionModel.Stories.Count);
             if (reportTask != null)
@@ -67,7 +93,7 @@ public sealed class ImageExporter
         }
     }
 
-    private WriteableBitmap RenderStoryBitmap(BasicStoryModel story)
+    private IReadOnlyList<RenderedSlice> RenderStorySlices(BasicStoryModel story)
     {
         // When rendering large bitmaps at once, RenderTargetBitmap may fail or produce incomplete results without throwing exceptions.
         // So we render each dialog separately and then combine them, which is more reliable even if it may use more memory temporarily.
@@ -83,26 +109,21 @@ public sealed class ImageExporter
             slices.Add(RenderSlice(viewBuilder.RenderDialog(dialog), DialogSpacing));
         }
 
-        slices[^1].SpacingAfterPixels = 0;
+        // Remove extra spacing after the last dialog.
+        slices[^1] = new RenderedSlice
+        {
+            Bitmap = slices[^1].Bitmap,
+            SpacingAfterPixels = 0
+        };
 
-        try
-        {
-            return ComposeStoryBitmap(slices);
-        }
-        finally
-        {
-            foreach (var slice in slices)
-            {
-                slice.Bitmap.Dispose();
-            }
-        }
+        return slices;
     }
 
     private RenderedSlice RenderSlice(Control content, int spacingAfterDip)
     {
         var host = new Border
         {
-            Width = StoryContentWidth,
+            Width = logicalWidth,
             Background = Brushes.White,
             Child = content
         };
@@ -218,9 +239,9 @@ public sealed class ImageExporter
         return bitmap;
     }
 
-    private sealed class RenderedSlice
+    private struct RenderedSlice
     {
-        public required RenderTargetBitmap Bitmap { get; init; }
-        public int SpacingAfterPixels { get; set; }
+        public RenderTargetBitmap Bitmap;
+        public int SpacingAfterPixels;
     }
 }
