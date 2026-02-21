@@ -1,0 +1,118 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- 背景渐变 -->
+        <linearGradient id="bg" x1="120" y1="100" x2="900" y2="920" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#3B82F6" />
+            <stop offset="0.5" stop-color="#6366F1" />
+            <stop offset="1" stop-color="#8B5CF6" />
+        </linearGradient>
+
+        <!-- 主卡片高光 -->
+        <linearGradient id="glass" x1="220" y1="180" x2="850" y2="760"
+            gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="white" stop-opacity="0.32" />
+            <stop offset="1" stop-color="white" stop-opacity="0.12" />
+        </linearGradient>
+
+        <!-- 备份徽章渐变 -->
+        <linearGradient id="badge" x1="700" y1="640" x2="900" y2="860"
+            gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#22C55E" />
+            <stop offset="1" stop-color="#14B8A6" />
+        </linearGradient>
+
+        <!-- 柔和阴影 -->
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#1E1B4B"
+                flood-opacity="0.25" />
+        </filter>
+
+        <!-- 页面阴影 -->
+        <filter id="pageShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#1F2937"
+                flood-opacity="0.12" />
+        </filter>
+    </defs>
+
+    <!-- App Icon 背景 -->
+    <rect x="32" y="32" width="960" height="960" rx="220" fill="url(#bg)" />
+
+    <!-- 背景装饰 -->
+    <circle cx="820" cy="210" r="120" fill="white" fill-opacity="0.10" />
+    <circle cx="260" cy="840" r="140" fill="white" fill-opacity="0.08" />
+    <path d="M120 250C250 170 380 190 470 130C560 70 690 90 840 170" stroke="white"
+        stroke-opacity="0.12" stroke-width="18" stroke-linecap="round" />
+
+    <!-- 玻璃感主卡片 -->
+    <g filter="url(#shadow)">
+        <rect x="140" y="170" width="744" height="600" rx="120" fill="url(#glass)" stroke="white"
+            stroke-opacity="0.22" stroke-width="2" />
+    </g>
+
+    <!-- 双对话气泡 -->
+    <g>
+        <!-- 左气泡 -->
+        <g filter="url(#pageShadow)">
+            <g transform="rotate(-6 382 438)">
+                <rect x="250" y="248" width="264" height="380" rx="42" fill="white"
+                    fill-opacity="0.94" />
+                <path d="M292 611L246 653L304 640L322 618Z" fill="white" fill-opacity="0.94" />
+            </g>
+        </g>
+
+        <!-- 右气泡 -->
+        <g filter="url(#pageShadow)">
+            <g transform="rotate(6 642 438)">
+                <rect x="510" y="248" width="264" height="380" rx="42" fill="white"
+                    fill-opacity="0.94" />
+                <path d="M732 618L750 640L808 653L762 611Z" fill="white" fill-opacity="0.94" />
+            </g>
+        </g>
+
+        <!-- 左气泡内容：对话线 + 引号 -->
+        <g transform="rotate(-6 382 438)">
+            <path d="M294 314C294 292 308 278 330 274V294C320 296 314 304 314 316H330V356H294V314Z"
+                fill="#6366F1" fill-opacity="0.85" />
+            <path d="M350 314C350 292 364 278 386 274V294C376 296 370 304 370 316H386V356H350V314Z"
+                fill="#6366F1" fill-opacity="0.85" />
+
+            <rect x="294" y="384" width="180" height="18" rx="9" fill="#818CF8" fill-opacity="0.70" />
+            <rect x="294" y="418" width="150" height="18" rx="9" fill="#A5B4FC" fill-opacity="0.85" />
+            <rect x="294" y="472" width="192" height="18" rx="9" fill="#818CF8" fill-opacity="0.70" />
+            <rect x="294" y="506" width="134" height="18" rx="9" fill="#A5B4FC" fill-opacity="0.85" />
+            <rect x="294" y="560" width="170" height="18" rx="9" fill="#818CF8" fill-opacity="0.70" />
+        </g>
+
+        <!-- 右气泡内容：对话线 -->
+        <g transform="rotate(6 642 438)">
+            <circle cx="560" cy="326" r="8" fill="#6366F1" fill-opacity="0.85" />
+            <circle cx="586" cy="326" r="8" fill="#6366F1" fill-opacity="0.85" />
+            <circle cx="612" cy="326" r="8" fill="#6366F1" fill-opacity="0.85" />
+
+            <rect x="546" y="384" width="190" height="18" rx="9" fill="#818CF8" fill-opacity="0.70" />
+            <rect x="586" y="418" width="150" height="18" rx="9" fill="#A5B4FC" fill-opacity="0.85" />
+            <rect x="546" y="472" width="176" height="18" rx="9" fill="#818CF8" fill-opacity="0.70" />
+            <rect x="602" y="506" width="120" height="18" rx="9" fill="#A5B4FC" fill-opacity="0.85" />
+            <rect x="546" y="560" width="200" height="18" rx="9" fill="#818CF8" fill-opacity="0.70" />
+        </g>
+    </g>
+
+    <!-- 下载徽章 -->
+    <g filter="url(#shadow)">
+        <g>
+            <circle cx="790" cy="742" r="118" fill="url(#badge)" stroke="white"
+                stroke-opacity="0.28" stroke-width="4" />
+
+            <!-- 下载箭头 -->
+            <path d="M790 692V758" stroke="#0F766E" stroke-width="16" stroke-linecap="round" />
+            <path d="M760 732L790 764L820 732" stroke="#0F766E" stroke-width="16"
+                stroke-linecap="round" stroke-linejoin="round" />
+            <rect x="746" y="776" width="88" height="14" rx="7" fill="#0F766E" opacity="0.85" />
+        </g>
+    </g>
+
+    <!-- 高光边缘 -->
+    <rect x="32" y="32" width="960" height="960" rx="220" stroke="white" stroke-opacity="0.18"
+        stroke-width="2" />
+</svg>
