@@ -31,8 +31,12 @@ Closed="Window_Closed">
                 <StackPanel Orientation="Vertical">
                     <Button Content="导出 TXT" Click="ExportAsTXT_Click" Margin="0,4,0,4" />
                     <DockPanel Margin="0,4,0,4">
-                        <Button DockPanel.Dock="Right" x:Name="ImageExportAdvancedToggleButton" Content="⚙" ToolTip.Tip="高级设置"
-                                Click="ToggleImageExportAdvancedPanel_Click" Width="32" Margin="4,0,0,0" />
+                        <Button DockPanel.Dock="Right" x:Name="ImageExportAdvancedToggleButton" ToolTip.Tip="高级设置"
+                                Click="ToggleImageExportAdvancedPanel_Click" Width="32" Margin="4,0,0,0">
+                            <Path Width="16" Height="16" Stretch="Uniform"
+                                  Data="{DynamicResource Icon_SettingsGeometry}"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </Button>
                         <Button Content="导出图片" Click="ExportAsImage_Click" x:Name="ExportAsImage" />
                     </DockPanel>
                     <Border x:Name="ImageExportAdvancedPanel" IsVisible="False" Margin="0,0,0,4" Padding="8"
