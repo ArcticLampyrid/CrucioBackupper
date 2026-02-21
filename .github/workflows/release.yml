@@ -99,8 +99,10 @@ jobs:
           mkdir -p artifacts/pkgroot/opt/crucio-backupper
           mkdir -p artifacts/pkgroot/usr/bin
           mkdir -p artifacts/pkgroot/usr/share/applications
+          mkdir -p artifacts/pkgroot/usr/share/mime/packages
           cp -R artifacts/linux-framework-dependent/. artifacts/pkgroot/opt/crucio-backupper/
           cp deploy/crucio-backupper.desktop artifacts/pkgroot/usr/share/applications/crucio-backupper.desktop
+          cp deploy/x-dign.xml artifacts/pkgroot/usr/share/mime/packages/x-dign.xml
           ln -s /opt/crucio-backupper/CrucioBackupper artifacts/pkgroot/usr/bin/crucio-backupper
 
       - name: Install packaging tools

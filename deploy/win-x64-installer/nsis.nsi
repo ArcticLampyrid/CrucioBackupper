@@ -129,6 +129,11 @@ Section "Program" SecProgram
     WriteRegDWORD HKLM "${REGPATH_UNINSTSUBKEY}" "NoModify" 1
     WriteRegDWORD HKLM "${REGPATH_UNINSTSUBKEY}" "NoRepair" 1
 
+    WriteRegStr HKLM "Software\Classes\.dign" "" "CrucioBackupper.dign"
+    WriteRegStr HKLM "Software\Classes\CrucioBackupper.dign" "" "Dialogue Novel File"
+    WriteRegStr HKLM "Software\Classes\CrucioBackupper.dign\DefaultIcon" "" "$InstDir\CrucioBackupper.exe,0"
+    WriteRegStr HKLM "Software\Classes\CrucioBackupper.dign\shell\open\command" "" '"$InstDir\CrucioBackupper.exe" "%1"'
+
     SetShellVarContext all
     CreateDirectory "$SMPROGRAMS\${NAME}"
     CreateShortCut "$SMPROGRAMS\${NAME}\CrucioBackupper.lnk" "$INSTDIR\CrucioBackupper.exe" "" ""
@@ -155,6 +160,8 @@ Section "Uninstall"
     SetShellVarContext all
     RMDir /r "$SMPROGRAMS\${NAME}"
     RMDir /r "$INSTDIR"
+    DeleteRegKey HKLM "Software\Classes\CrucioBackupper.dign"
+    DeleteRegKey HKLM "Software\Classes\.dign"
     DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
     DeleteRegKey HKLM "Software\${NAME}"
 SectionEnd
