@@ -4,6 +4,7 @@ xmlns="https://github.com/avaloniaui"
 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
 xmlns:logviewer="using:CrucioBackupper.LogViewer"
+xmlns:controls="using:CrucioBackupper.Controls"
 Width="800"
 Height="500"
 Title="快点阅读文章备份器"
@@ -87,8 +88,18 @@ DragDrop.Drop="Window_Drop">
             </DockPanel>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="其他操作" />
-            <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button Margin="5,0,0,0" x:Name="ReadBackupButton" Click="ReadBackupButton_Click" Content="查看备份" />
+            <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                <Image
+                    Width="16"
+                    Height="16"
+                    VerticalAlignment="Center"
+                    Source="{DynamicResource Icon_ThemeContrast}" />
+                <controls:OptionSelectorControl
+                    x:Name="ThemeModeSelector"
+                    VerticalAlignment="Center"
+                    Options="{Binding Options}"
+                    SelectedValue="{Binding ThemeMode, Mode=TwoWay}" />
+                <Button Margin="8,0,0,0" x:Name="ReadBackupButton" Click="ReadBackupButton_Click" Content="查看备份" />
             </StackPanel>
         </Grid>
 

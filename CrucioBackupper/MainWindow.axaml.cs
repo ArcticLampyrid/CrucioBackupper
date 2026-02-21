@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ThemeModeSelector.DataContext = ThemeInfoViewModel.Instance;
 
         var logViewModel = new LogViewModel();
         var log = new LoggerConfiguration()

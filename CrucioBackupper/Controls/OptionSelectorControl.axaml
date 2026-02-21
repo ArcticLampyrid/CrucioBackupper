@@ -1,0 +1,62 @@
+<UserControl
+    x:Class="CrucioBackupper.Controls.OptionSelectorControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Root">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="OptionSelectorSelectedBackground">#E8F1FF</SolidColorBrush>
+                    <SolidColorBrush x:Key="OptionSelectorSelectedBorderBrush">#9DBCE8</SolidColorBrush>
+                    <SolidColorBrush x:Key="OptionSelectorSelectedForeground">#1E5AA8</SolidColorBrush>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="OptionSelectorSelectedBackground">#2E4E73</SolidColorBrush>
+                    <SolidColorBrush x:Key="OptionSelectorSelectedBorderBrush">#6F9FD4</SolidColorBrush>
+                    <SolidColorBrush x:Key="OptionSelectorSelectedForeground">#EDF4FF</SolidColorBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="ListBox.optionSelector">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.optionSelector > ListBoxItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="ListBox.optionSelector > ListBoxItem:selected">
+            <Setter Property="Background" Value="{DynamicResource OptionSelectorSelectedBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OptionSelectorSelectedBorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource OptionSelectorSelectedForeground}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+    </UserControl.Styles>
+
+    <ListBox
+        x:Name="OptionListBox"
+        Classes="optionSelector"
+        ItemsSource="{Binding Options, ElementName=Root}"
+        SelectedItem="{Binding SelectedOption, ElementName=Root, Mode=TwoWay}">
+        <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="1" />
+            </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+</UserControl>
