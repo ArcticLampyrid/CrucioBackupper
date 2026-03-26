@@ -39,7 +39,7 @@ namespace CrucioNetwork
                 UseCookies = true,
                 CookieContainer = cookieContainer
             });
-            client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/4.01.03.1 (Android/28;Build/HUAWEI GLK-AL00;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
+            client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Crucio/5.29.66.1 (Android/28;Build/HUAWEI GLK-AL00;Manufacturer/Huawei;Os/emui;Screen/480dpi-1080x2310;Uid/{uid}) Hybrid/-1");
 
         }
 
@@ -74,13 +74,6 @@ namespace CrucioNetwork
         }
 
         #region Uid
-        private static string GenerateMac(Random random)
-        {
-            var buffer = new byte[6];
-            random.NextBytes(buffer);
-            var result = string.Join(":", buffer.Select(x => string.Format("{0}", x.ToString("X2"))));
-            return result;
-        }
         private static string GenerateImei(Random random)
         {
             var reportingBodyIds = new string[] { "01", "10", "30", "33", "35", "44", "45", "49", "50", "51", "52", "53", "54", "86", "91", "98", "99" };
@@ -109,7 +102,7 @@ namespace CrucioNetwork
         }
         private static string GenerateUid(Random random)
         {
-            var nakedUid = GenerateImei(random) + ";" + GenerateMac(random) + ";" + GenerateDeviceId(random);
+            var nakedUid = GenerateImei(random) + ";;" + GenerateDeviceId(random);
             var result = new byte[64];
             var paddingStart = Encoding.UTF8.GetBytes(nakedUid, 0, nakedUid.Length, result, 0);
             for (int i = paddingStart; i < result.Length; i++)
