@@ -134,7 +134,7 @@ public sealed class DialogControlBuilder
     private Control CreateTextMessageControl(DialogModel dialog)
     {
         var text = dialog.Text ?? string.Empty;
-        var control = new TextBlock
+        var control = new SelectableTextBlock
         {
             Text = text,
             TextWrapping = TextWrapping.Wrap,
@@ -148,7 +148,14 @@ public sealed class DialogControlBuilder
             {
                 if (TopLevel.GetTopLevel(control)?.Clipboard is { } clipboard)
                 {
-                    await clipboard.SetTextAsync(text);
+                    if (string.IsNullOrEmpty(control.SelectedText))
+                    {
+                        await clipboard.SetTextAsync(text);
+                    }
+                    else
+                    {
+                        await clipboard.SetTextAsync(control.SelectedText);
+                    }
                 }
             });
         return control;
